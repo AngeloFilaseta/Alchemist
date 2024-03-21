@@ -29,6 +29,7 @@ include(
     "alchemist-loading",
     "alchemist-maintenance-tooling",
     "alchemist-maps",
+    "alchemist-monitor",
     "alchemist-multivesta-adapter",
     "alchemist-physics",
     "alchemist-sapere-mathexp",
