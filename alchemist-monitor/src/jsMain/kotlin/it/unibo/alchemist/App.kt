@@ -15,6 +15,7 @@ import react.Props
 import react.create
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.h1
+import react.dom.html.ReactHTML.span
 import web.dom.Element
 
 class App {
@@ -31,8 +32,10 @@ class App {
      * The App to render.
      */
     val App: FC<Props> = FC {
-        h1 {
-            +"Hello, world!"
+        span {
+            h1 {
+                +"Hello, world!"
+            }
         }
     }
 }

@@ -16,7 +16,6 @@ import io.gitlab.arturbosch.detekt.Detekt
 import java.io.File.separator
 
 plugins {
-    application
     alias(libs.plugins.kotest.multiplatform)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktor)
@@ -68,10 +67,6 @@ kotlin {
             }
         }
     }
-}
-
-application {
-    mainClass.set("it.unibo.alchemist.Alchemist")
 }
 
 graphql {
@@ -126,18 +121,6 @@ tasks.withType<ApolloGenerateSourcesTask>().configureEach {
  * Webpack task that generates the JS artifacts.
  */
 val webpackTask = tasks.named("jsBrowserProductionWebpack")
-
-tasks.named("run", JavaExec::class).configure {
-    classpath(
-        tasks.named("compileKotlinJvm"),
-        configurations.named("jvmRuntimeClasspath"),
-        webpackTask.map { task ->
-            task.outputs.files.map { file ->
-                file.parent
-            }
-        },
-    )
-}
 
 /**
  * Configure the [ShadowJar] task to work exactly like the "jvmJar" task of Kotlin Multiplatform, but also

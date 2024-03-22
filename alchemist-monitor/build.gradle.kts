@@ -48,6 +48,8 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 api(alchemist("api"))
+                implementation(alchemist("graphql"))
+                implementation(alchemist("graphql-surrogates"))
                 implementation(incarnation("sapere"))
                 implementation(rootProject)
                 implementation(libs.bundles.ktor.server)
@@ -101,7 +103,7 @@ tasks.named("run", JavaExec::class).configure {
         configurations.named("jvmRuntimeClasspath"),
         webpackTask.map { task ->
             task.outputs.files.map { file ->
-                file.parent
+                file
             }
         },
     )

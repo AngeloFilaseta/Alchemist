@@ -10,11 +10,13 @@
 package it.unibo.alchemist.server
 
 import io.ktor.server.netty.EngineMain
+import it.unibo.alchemist.GraphQLClientsController
 import kotlinx.coroutines.runBlocking
 
 data class MonitorServer(val connectionStrings: List<String>) {
     fun start() {
         return runBlocking {
+            GraphQLClientsController.fromStrings(*connectionStrings.toTypedArray())
             EngineMain.main(emptyArray())
         }
     }
