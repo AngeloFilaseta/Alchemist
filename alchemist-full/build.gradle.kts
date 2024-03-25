@@ -8,7 +8,6 @@
 import Libs.alchemist
 import Util.commandExists
 import Util.isMac
-import Util.isMultiplatform
 import Util.isWindows
 import Util.testShadowJar
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
@@ -33,21 +32,42 @@ plugins {
     alias(libs.plugins.shadowJar)
 }
 
-dependencies {
-    runtimeOnly(rootProject)
-    rootProject.subprojects.filterNot { it == project }.forEach {
-        if (it.isMultiplatform) {
-            runtimeOnly(project(path = ":${it.name}", configuration = "default"))
-        } else {
-            runtimeOnly(it)
+kotlin {
+    jvm {
+        withJava()
+    }
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                runtimeOnly(rootProject)
+                rootProject.subprojects.filterNot { it == project }.forEach {
+                    runtimeOnly(it)
+                }
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(rootProject)
+                implementation(alchemist("physics"))
+            }
         }
     }
-    testImplementation(rootProject)
-    testImplementation(alchemist("physics"))
 }
 
 application {
     mainClass.set("it.unibo.alchemist.Alchemist")
+}
+
+/**
+ * Add the runtime classpath of the multiplatform JVM projects to the run task
+ */
+tasks.named("run", JavaExec::class) {
+    allprojects.map {
+        tasks.named("compileKotlinJvm").get().outputs.files +
+            configurations.named("jvmRuntimeClasspath").get()
+    }.forEach {
+        classpath += it
+    }
 }
 
 // Shadow Jar
@@ -73,6 +93,8 @@ tasks.withType<ShadowJar> {
         "gradlew.bat",
         "gradlew",
     )
+    from(tasks.named<Jar>("jvmJar").get())
+    configurations.add(project.configurations.named("jvmRuntimeClasspath").get())
     isZip64 = true
     mergeServiceFiles()
     destinationDirectory.set(rootProject.layout.buildDirectory.map { it.dir("shadow") })
