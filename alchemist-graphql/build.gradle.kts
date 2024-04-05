@@ -22,7 +22,7 @@ plugins {
 }
 
 kotlin {
-    jvm()
+    jvm { withJava() }
     js(IR) {
         browser {
             binaries.executable()

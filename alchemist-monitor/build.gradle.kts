@@ -19,10 +19,10 @@ plugins {
 kotlin {
     jvm {
         withJava()
-        js(IR) {
-            browser {
-                binaries.executable()
-            }
+    }
+    js(IR) {
+        browser {
+            binaries.executable()
         }
     }
     sourceSets {
