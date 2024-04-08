@@ -9,33 +9,17 @@
 
 package it.unibo.alchemist
 
-import kotlinx.browser.document
 import react.FC
 import react.Props
 import react.create
 import react.dom.client.createRoot
-import react.dom.html.ReactHTML.h1
-import react.dom.html.ReactHTML.span
-import web.dom.Element
+import web.dom.document
 
-class App {
+fun main() {
+    val document = document.getElementById("root") ?: error("Couldn't find container!")
+    createRoot(document).render(App.create())
+}
 
-    /**
-     * The entry point of the Kotlin/JS application. Find the root element and render the App.
-     */
-    fun main() {
-        val container = document.getElementById("root") ?: error("Couldn't find container!")
-        createRoot(container.unsafeCast<Element>()).render(App.create())
-    }
-
-    /**
-     * The App to render.
-     */
-    val App: FC<Props> = FC {
-        span {
-            h1 {
-                +"Hello, world!"
-            }
-        }
-    }
+private val App = FC<Props> {
+    +"Hello, world!"
 }
