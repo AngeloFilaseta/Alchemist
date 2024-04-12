@@ -29,6 +29,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 compileOnly(libs.spotbugs.annotations)
+                implementation(alchemist("graphql"))
+                implementation(libs.apollo.runtime)
                 implementation(libs.korim)
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.kotlinx.serialization.json)
@@ -48,7 +50,6 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 api(alchemist("api"))
-                implementation(alchemist("graphql"))
                 implementation(alchemist("graphql-surrogates"))
                 implementation(incarnation("sapere"))
                 implementation(rootProject)
@@ -95,7 +96,7 @@ application {
 /**
  * Webpack task that generates the JS artifacts.
  */
-val webpackTask = tasks.named("jsBrowserProductionWebpack")
+val webpackTask = tasks.named("jsBrowserDevelopmentWebpack")
 
 tasks.named("run", JavaExec::class).configure {
     classpath(

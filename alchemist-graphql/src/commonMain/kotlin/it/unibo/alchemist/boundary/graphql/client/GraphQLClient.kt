@@ -20,6 +20,11 @@ import com.apollographql.apollo3.api.Subscription
 interface GraphQLClient {
 
     /**
+     * The URL of the GraphQL server.
+     */
+    val serverUrl: String
+
+    /**
      * Prepare a query to be executed.
      * @param query the query to be executed
      * @return the associated [ApolloCall] that can be executed

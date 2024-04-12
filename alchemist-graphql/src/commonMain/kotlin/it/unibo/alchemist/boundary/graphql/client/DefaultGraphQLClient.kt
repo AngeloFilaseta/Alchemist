@@ -25,13 +25,16 @@ import it.unibo.alchemist.boundary.graphql.utils.DefaultGraphQLSettings
  * @param port the port of the GraphQL server
  * @param enableSubscription whether to enable subscriptions or not
  */
-class DefaultGraphQLClient(
+data class DefaultGraphQLClient(
     private val host: String = DefaultGraphQLSettings.DEFAULT_HOST,
     private val port: Int = DefaultGraphQLSettings.DEFAULT_PORT,
     private val enableSubscription: Boolean = false,
 ) : GraphQLClient {
+
+    override val serverUrl: String get() = "http://$host:$port/graphql"
+
     private val client: ApolloClient = ApolloClient.Builder()
-        .serverUrl("http://$host:$port/graphql")
+        .serverUrl(serverUrl)
         .apply {
             if (enableSubscription) {
                 subscriptionNetworkTransport(

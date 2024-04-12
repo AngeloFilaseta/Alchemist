@@ -26,13 +26,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * This class realizes a node with LSA concentration.
  */
 public final class LsaNode extends GenericNode<List<ILsaMolecule>> implements ILsaNode {
     private static final long serialVersionUID = -2167025208984968645L;
-    private final List<ILsaMolecule> instances = new ArrayList<>();
+    private final List<ILsaMolecule> instances = new CopyOnWriteArrayList<>();
     private static final ILsaMolecule ZEROMOL = new LsaMolecule("0");
 
     /**

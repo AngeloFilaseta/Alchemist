@@ -9,7 +9,8 @@
 
 package it.unibo.alchemist.server
 
+import io.ktor.server.netty.EngineMain
+
 fun main(args: Array<String>) {
-    val server = MonitorServer(args.toList())
-    server.start()
+    EngineMain.main(args)
 }

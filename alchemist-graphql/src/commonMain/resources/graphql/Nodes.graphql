@@ -1,0 +1,14 @@
+query Nodes {
+    environment {
+        nodes {
+            contents {
+                entries {
+                    molecule {
+                        name
+                    }
+                    concentration
+                }
+            }
+        }
+    }
+}
