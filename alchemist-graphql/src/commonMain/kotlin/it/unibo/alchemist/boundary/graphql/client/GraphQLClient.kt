@@ -20,9 +20,24 @@ import com.apollographql.apollo3.api.Subscription
 interface GraphQLClient {
 
     /**
+     * The address of the GraphQL server.
+     */
+    val host: String
+
+    /**
+     * The port of the GraphQL server.
+     */
+    val port: Int
+
+    /**
      * The URL of the GraphQL server.
      */
-    val serverUrl: String
+    fun serverUrl(): String = "http://$host:$port/graphql"
+
+    /**
+     * The URL of the GraphQL server subscription.
+     */
+    fun subscriptionUrl(): String
 
     /**
      * Prepare a query to be executed.
