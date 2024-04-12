@@ -8,11 +8,9 @@
  */
 
 import Libs.alchemist
-import Libs.incarnation
 
 plugins {
     application
-    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotest.multiplatform)
 }
 
@@ -31,9 +29,7 @@ kotlin {
                 compileOnly(libs.spotbugs.annotations)
                 implementation(alchemist("graphql"))
                 implementation(libs.apollo.runtime)
-                implementation(libs.korim)
                 implementation(libs.kotlin.stdlib)
-                implementation(libs.kotlinx.serialization.json)
                 implementation(libs.ktor.client.core)
                 implementation(libs.redux.kotlin.threadsafe)
             }
@@ -49,10 +45,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                api(alchemist("api"))
                 implementation(alchemist("graphql-surrogates"))
-                implementation(incarnation("sapere"))
-                implementation(rootProject)
                 implementation(libs.bundles.ktor.server)
                 implementation(libs.logback)
                 implementation(libs.resourceloader)
@@ -63,16 +56,13 @@ kotlin {
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotest.runner)
                 implementation(libs.ktor.server.test.host)
-                implementation(alchemist("euclidean-geometry"))
-                implementation(alchemist("implementationbase"))
-                implementation(alchemist("test"))
             }
         }
         val jsMain by getting {
             dependencies {
+                implementation(libs.lets.plot.js)
                 implementation(libs.bundles.ktor.client)
                 implementation(libs.bundles.kotlin.react)
-                implementation(npm("react-bootstrap", "2.5.0"))
             }
         }
     }

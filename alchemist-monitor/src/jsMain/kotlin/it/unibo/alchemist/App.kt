@@ -7,65 +7,53 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-@file:Suppress("CAST_NEVER_SUCCEEDS")
-
 package it.unibo.alchemist
 
-import it.unibo.alchemist.boundary.graphql.client.GraphQLClientFactory
-import it.unibo.alchemist.monitor.GraphQLSubscriptionManager
-import org.w3c.dom.HTMLInputElement
+import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
+import it.unibo.alchemist.component.AddSubscriptionClientForm
+import it.unibo.alchemist.state.AddSubscripionClient
+import it.unibo.alchemist.state.store
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import react.FC
 import react.Props
+import react.StateSetter
 import react.create
 import react.dom.client.createRoot
-import react.dom.html.ReactHTML.button
-import react.dom.html.ReactHTML.form
-import react.dom.html.ReactHTML.input
-import react.dom.html.ReactHTML.li
-import react.dom.html.ReactHTML.ul
+import react.dom.html.ReactHTML.p
+import react.useEffect
 import react.useState
 import web.dom.document
+
+val scope = MainScope()
 
 fun main() {
     val document = document.getElementById("root") ?: error("Couldn't find container!")
     createRoot(document).render(App.create())
 }
 
-private val App = FC<Props> {
-    var subscriptionManager by useState(GraphQLSubscriptionManager.fromClients(emptyList()))
-    var inputText by useState("")
-
-    form {
-        input {
-            placeholder = "localhost:8080"
-            value = inputText
-            onChange = { inputText = (it.target as HTMLInputElement).value }
-        }
-    }
-    button {
-        onClick = {
-            val port = inputText.split(":").last()
-            console.log(port)
-            val address = inputText.removeSuffix(":$port")
-            console.log(address)
-            console.log("Adding client with address $address and port $port")
-            try {
-                val client = GraphQLClientFactory.basicClient(address, port.toInt())
-                console.log(client.serverUrl)
-                subscriptionManager = GraphQLSubscriptionManager.fromClients(
-                    listOf(client),
-                )
-            } catch (e: Exception) {
-                console.error(e)
+fun subscribeAndCollect(setData: StateSetter<String>) {
+    scope.launch {
+        store.state.subscriptionManager.subscribe(NodesSubscription()).map { entry ->
+            entry.value.collect {
+                console.log(it.data.toString())
+                setData(it.data.toString())
             }
-            inputText = ""
         }
-        +"Add client"
     }
-    // Render the list of clients
-    ul {
-        subscriptionManager.clients.forEach { client ->
-            li { +client.serverUrl }
+}
+
+private val App = FC<Props> {
+    val (data, setData) = useState("initial")
+    useEffect(*emptyArray()) { // or useEffectOnce
+        store.dispatch(AddSubscripionClient("localhost", 1313))
+        store.state.subscriptionManager.clients.forEach { client ->
+            console.log(client.serverUrl())
         }
+        subscribeAndCollect(setData)
+    }
+    AddSubscriptionClientForm()
+    p {
+        +data
     }
 }

@@ -1,4 +1,4 @@
-query Nodes {
+subscription NodesSubscription {
     environment {
         nodes {
             contents {
