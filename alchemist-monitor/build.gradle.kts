@@ -32,6 +32,7 @@ kotlin {
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.ktor.client.core)
                 implementation(libs.redux.kotlin.threadsafe)
+                implementation(libs.lets.plot)
             }
         }
         val commonTest by getting {
@@ -60,7 +61,6 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
-                implementation(libs.lets.plot.js)
                 implementation(libs.bundles.ktor.client)
                 implementation(libs.bundles.kotlin.react)
             }

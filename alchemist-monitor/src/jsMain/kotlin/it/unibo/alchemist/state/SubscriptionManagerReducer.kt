@@ -10,19 +10,19 @@
 package it.unibo.alchemist.state
 
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClientFactory
-import it.unibo.alchemist.monitor.GraphQLSubscriptionManager
+import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 
 fun subscriptionManagerReducer(
-    state: GraphQLSubscriptionManager,
+    state: GraphQLSubscriptionController,
     action: Any,
-): GraphQLSubscriptionManager = when (action) {
+): GraphQLSubscriptionController = when (action) {
     is AddSubscripionClient -> {
-        GraphQLSubscriptionManager.fromClients(
+        GraphQLSubscriptionController.fromClients(
             state.clients + GraphQLClientFactory.subscriptionClient(action.host, action.port),
         )
     }
     is RemoveSubscriptionClient -> {
-        GraphQLSubscriptionManager.fromClients(
+        GraphQLSubscriptionController.fromClients(
             state.clients.filterNot {
                 it.host == action.host && it.port == action.port
             }.onEach {

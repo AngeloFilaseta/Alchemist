@@ -94,7 +94,7 @@ ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor"
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 ktor-server-websockets = { module = "io.ktor:ktor-server-websockets-jvm", version.ref = "ktor" }
 leafletmap = "org.danilopianini:de.saring.leafletmap:1.0.5"
-lets-plot-js = "org.jetbrains.lets-plot:lets-plot-kotlin-js:4.7.0"
+lets-plot = "org.jetbrains.lets-plot:lets-plot-kotlin:4.7.0"
 listset = "org.danilopianini:listset:0.3.9"
 logback = "ch.qos.logback:logback-classic:1.5.3"
 mapsforge = "org.mapsforge:mapsforge-map-awt:0.21.0"

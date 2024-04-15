@@ -12,15 +12,15 @@ package it.unibo.alchemist.monitor.impl
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
-import it.unibo.alchemist.monitor.GraphQLSubscriptionManager
+import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Implementation of [GraphQLSubscriptionManager].
+ * Implementation of [GraphQLSubscriptionController].
  */
-internal data class GraphQLSubscriptionManagerImpl(
+internal data class GraphQLSubscriptionControllerImpl(
     override val clients: List<GraphQLClient>,
-) : GraphQLSubscriptionManager {
+) : GraphQLSubscriptionController {
 
     override fun <D : Subscription.Data> subscribe(
         subscription: Subscription<D>,

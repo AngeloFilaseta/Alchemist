@@ -10,50 +10,60 @@
 package it.unibo.alchemist
 
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
-import it.unibo.alchemist.component.AddSubscriptionClientForm
+import it.unibo.alchemist.data.mapper.ApolloResponseMapper
 import it.unibo.alchemist.state.AddSubscripionClient
 import it.unibo.alchemist.state.store
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import react.EffectBuilder
 import react.FC
 import react.Props
-import react.StateSetter
 import react.create
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.p
 import react.useEffect
+import react.useEffectOnce
 import react.useState
-import web.dom.document
+import web.dom.document as webDomDocument
 
 val scope = MainScope()
 
 fun main() {
-    val document = document.getElementById("root") ?: error("Couldn't find container!")
+    val document = webDomDocument.getElementById("root") ?: error("Couldn't find container!")
     createRoot(document).render(App.create())
 }
 
-fun subscribeAndCollect(setData: StateSetter<String>) {
-    scope.launch {
-        store.state.subscriptionManager.subscribe(NodesSubscription()).map { entry ->
-            entry.value.collect {
-                console.log(it.data.toString())
-                setData(it.data.toString())
-            }
+private val App = FC<Props> {
+    val subscription by useState(NodesSubscription())
+
+    useEffectOnce {
+        store.dispatch(AddSubscripionClient("localhost", 1313))
+    }
+    useEffect(listOf(subscription)) {
+        sub {
+            store.state.subscriptionManager.subscribeAndCollect(
+                subscription,
+                ApolloResponseMapper.nodeSubscriptionMapper(),
+                { pair ->
+                    console.log(pair)
+                },
+            )
         }
+    }
+    p {
+        +subscription.name()
     }
 }
 
-private val App = FC<Props> {
-    val (data, setData) = useState("initial")
-    useEffect(*emptyArray()) { // or useEffectOnce
-        store.dispatch(AddSubscripionClient("localhost", 1313))
-        store.state.subscriptionManager.clients.forEach { client ->
-            console.log(client.serverUrl())
+private fun EffectBuilder.sub(block: suspend () -> Unit) {
+    var ignore = false
+    val job = scope.launch {
+        if (!ignore) {
+            block()
         }
-        subscribeAndCollect(setData)
     }
-    AddSubscriptionClientForm()
-    p {
-        +data
+    cleanup {
+        job.cancel()
+        ignore = true
     }
 }

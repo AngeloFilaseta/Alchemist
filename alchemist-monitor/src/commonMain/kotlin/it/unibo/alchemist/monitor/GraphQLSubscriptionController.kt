@@ -12,13 +12,16 @@ package it.unibo.alchemist.monitor
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
-import it.unibo.alchemist.monitor.impl.GraphQLSubscriptionManagerImpl
+import it.unibo.alchemist.data.mapper.ApolloResponseMapper
+import it.unibo.alchemist.monitor.impl.GraphQLSubscriptionControllerImpl
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.map
 
 /**
  * Handle the subscription to the Alchemist subscription clients.
  */
-interface GraphQLSubscriptionManager {
+interface GraphQLSubscriptionController {
 
     /**
      * The list of clients to be managed.
@@ -37,6 +40,24 @@ interface GraphQLSubscriptionManager {
     ): Map<GraphQLClient, Flow<ApolloResponse<D>>>
 
     /**
+     * Subscribe to a given subscription on all clients and collect the data into mutable lists
+     * @param subscription the subscription to be executed.
+     * @param filter a filter to be applied to the data.
+     */
+    suspend fun <D : Subscription.Data, P> subscribeAndCollect(
+        subscription: Subscription<D>,
+        mapper: ApolloResponseMapper<D, P>,
+        collector: FlowCollector<P>,
+        filter: (D) -> Boolean = { true },
+    ) {
+        subscribe(subscription, filter).mapValues { entry ->
+            entry.value.map { response ->
+                mapper.invoke(response)
+            }.collect(collector)
+        }
+    }
+
+    /**
      * Close all clients that satisfy the given filter.
      * @param filter a filter to be applied to the clients.
      */
@@ -47,7 +68,7 @@ interface GraphQLSubscriptionManager {
          * Create a new instance from a list of clients.
          * @param clients the list of clients.
          */
-        fun fromClients(clients: List<GraphQLClient>): GraphQLSubscriptionManager =
-            GraphQLSubscriptionManagerImpl(clients)
+        fun fromClients(clients: List<GraphQLClient>): GraphQLSubscriptionController =
+            GraphQLSubscriptionControllerImpl(clients)
     }
 }

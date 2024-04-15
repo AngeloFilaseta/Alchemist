@@ -9,15 +9,15 @@
 
 package it.unibo.alchemist.state
 
-import it.unibo.alchemist.monitor.GraphQLSubscriptionManager
+import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 
 /**
  * State of the monitor component.
- * @param subscriptionManager the [GraphQLSubscriptionManager] that manages the subscriptions.
+ * @param subscriptionManager the [GraphQLSubscriptionController] that manages the subscriptions.
  */
 data class MonitorState(
-    val subscriptionManager: GraphQLSubscriptionManager =
-        GraphQLSubscriptionManager.fromClients(emptyList()),
+    val subscriptionManager: GraphQLSubscriptionController =
+        GraphQLSubscriptionController.fromClients(emptyList()),
 )
 
 /**
