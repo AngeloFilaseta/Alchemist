@@ -19,15 +19,12 @@ import io.ktor.server.plugins.compression.Compression
 import io.ktor.server.plugins.compression.gzip
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.websocket.WebSockets
-import io.ktor.server.websocket.pingPeriod
-import io.ktor.server.websocket.timeout
 import it.unibo.alchemist.boundary.graphql.schema.operations.mutations.SimulationControl
 import it.unibo.alchemist.boundary.graphql.schema.operations.queries.EnvironmentQueries
 import it.unibo.alchemist.boundary.graphql.schema.operations.queries.NodeQueries
 import it.unibo.alchemist.boundary.graphql.schema.operations.subscriptions.EnvironmentSubscriptions
 import it.unibo.alchemist.boundary.graphql.schema.operations.subscriptions.NodeSubscriptions
 import it.unibo.alchemist.model.Environment
-import java.time.Duration
 
 // The following values are referred to milliseconds.
 private const val DEFAULT_PING_PERIOD = 1000L
@@ -46,8 +43,6 @@ fun Application.graphQLModule(environment: Environment<*, *>) {
     }
 
     install(WebSockets) {
-        pingPeriod = Duration.ofMillis(DEFAULT_PING_PERIOD)
-        timeout = Duration.ofMillis(DEFAULT_TIMEOUT_DURATION)
         maxFrameSize = Long.MAX_VALUE
         masking = false
         contentConverter = JacksonWebsocketContentConverter()
