@@ -19,15 +19,15 @@ kotlin {
         withJava()
     }
     js(IR) {
-        browser {
-            binaries.executable()
-        }
+        browser()
+        binaries.executable()
     }
     sourceSets {
         val commonMain by getting {
             dependencies {
                 compileOnly(libs.spotbugs.annotations)
                 implementation(alchemist("graphql"))
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0-RC.2")
                 implementation(libs.apollo.runtime)
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.ktor.client.core)

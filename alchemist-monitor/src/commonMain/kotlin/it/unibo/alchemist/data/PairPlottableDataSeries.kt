@@ -13,9 +13,13 @@ import org.jetbrains.letsPlot.geom.geomDensity
 import org.jetbrains.letsPlot.intern.Plot
 import org.jetbrains.letsPlot.letsPlot
 
-class PairPlottableDataSeries<X, Y>(
-    private val pairs: List<Pair<X, Y>>,
+data class PairPlottableDataSeries<X, Y>(
+    val pairs: List<Pair<X, Y>>,
 ) : PlottableDataSeries<Pair<X, Y>> {
+
+    operator fun plus(pair: Pair<X, Y>): PairPlottableDataSeries<X, Y> {
+        return PairPlottableDataSeries(pairs + pair)
+    }
 
     override fun toPlot(xLabel: String, yLabel: String): Plot {
         val plot = letsPlot(mapOf(*pairs.toTypedArray())) + geomDensity(

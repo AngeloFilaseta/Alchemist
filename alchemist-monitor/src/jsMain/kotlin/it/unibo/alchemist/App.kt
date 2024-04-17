@@ -10,11 +10,14 @@
 package it.unibo.alchemist
 
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
+import it.unibo.alchemist.data.PairPlottableDataSeries
 import it.unibo.alchemist.data.mapper.ApolloResponseMapper
 import it.unibo.alchemist.state.AddSubscripionClient
 import it.unibo.alchemist.state.store
+import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import org.jetbrains.letsPlot.frontend.JsFrontendUtil
 import react.EffectBuilder
 import react.FC
 import react.Props
@@ -33,7 +36,7 @@ fun main() {
 }
 
 private val App = FC<Props> {
-    val (list, setList) = useState(emptyList<Pair<Long, Double>?>())
+    val (series, setSeries) = useState(PairPlottableDataSeries(emptyList<Pair<Long, Double>>()))
     val subscription by useState(NodesSubscription())
 
     useEffectOnce {
@@ -43,8 +46,13 @@ private val App = FC<Props> {
                 subscription,
                 ApolloResponseMapper.nodeSubscriptionMapper(),
                 { pair ->
-                    setList {
-                        it + pair
+                    pair?.let {
+                        setSeries {
+                            it + pair
+                        }
+                        val contentDiv = document.getElementById("plot")
+                        val plotDiv = JsFrontendUtil.createPlotDiv(series.toPlot("time", "hits"))
+                        contentDiv?.appendChild(plotDiv)
                     }
                 },
             )
@@ -54,7 +62,7 @@ private val App = FC<Props> {
         +subscription.name()
     }
     p {
-        +list.toString()
+        +series.toString()
     }
 }
 
