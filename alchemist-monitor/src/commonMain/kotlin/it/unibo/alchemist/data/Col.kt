@@ -9,17 +9,9 @@
 
 package it.unibo.alchemist.data
 
-import org.jetbrains.letsPlot.intern.Plot
-
-/**
- * Data series that can be plotted.
- * @param P data type
- */
-interface PlottableDataSeries<P> {
+data class Col<D>(val name: String, val data: List<D>) {
     /**
-     * Convert the data series to a plot.
-     * @param xLabel the label for the x axis
-     * @param yLabel the label for the y axis
+     * Add a new element to the data list.
      */
-    fun toPlot(xLabel: String, yLabel: String): Plot
+    operator fun plus(other: D): Col<D> = Col(name, data + other)
 }

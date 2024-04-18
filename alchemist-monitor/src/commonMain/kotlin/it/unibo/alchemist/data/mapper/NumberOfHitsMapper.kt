@@ -11,6 +11,7 @@ package it.unibo.alchemist.data.mapper
 
 import com.apollographql.apollo3.api.ApolloResponse
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
+import kotlinx.datetime.Clock
 
 class NumberOfHitsMapper : ApolloResponseMapper<NodesSubscription.Data, Pair<Long, Double>?> {
     override fun invoke(response: ApolloResponse<NodesSubscription.Data>): Pair<Long, Double>? {
@@ -21,7 +22,7 @@ class NumberOfHitsMapper : ApolloResponseMapper<NodesSubscription.Data, Pair<Lon
                 entry.molecule.name.filter { it.isDigit() }.toInt()
             }
         }?.average()?.let {
-            0L to it
+            Clock.System.now().epochSeconds to it
         }
     }
 }
