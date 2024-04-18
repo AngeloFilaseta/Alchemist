@@ -9,6 +9,12 @@
 
 package it.unibo.alchemist.data
 
+/**
+ * A column of a [DataFrame].
+ * @param D the type of the data.
+ * @property name the name of the column.
+ * @property data the data in the column.
+ */
 data class Col<D>(val name: String, val data: List<D>) {
     /**
      * Add a new element to the data list.

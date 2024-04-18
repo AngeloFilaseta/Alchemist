@@ -16,7 +16,14 @@ import org.jetbrains.letsPlot.label.xlab
 import org.jetbrains.letsPlot.letsPlot
 import org.jetbrains.letsPlot.pos.positionFill
 
+/**
+ * A data frame, containing a list of columns.
+ * @property cols the columns of the data frame.
+ */
 data class DataFrame(private val cols: List<Col<Any>>) {
+    /**
+     * Create a [Plot] using the data frame.
+     */
     fun toPlot(): Plot {
         val plot = letsPlot(cols.associate { it.name to it.data }) + geomLine(
             stat = Stat.identity,
