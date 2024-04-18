@@ -10,6 +10,7 @@
 package it.unibo.alchemist
 
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
+import it.unibo.alchemist.component.MutationButtons
 import it.unibo.alchemist.data.Col
 import it.unibo.alchemist.data.mapper.ApolloResponseMapper
 import it.unibo.alchemist.state.AddSubscripionClient
@@ -19,7 +20,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.jetbrains.letsPlot.frontend.JsFrontendUtil
 import org.jetbrains.letsPlot.geom.geomLine
-import org.jetbrains.letsPlot.ggsize
 import org.jetbrains.letsPlot.letsPlot
 import react.EffectBuilder
 import react.FC
@@ -46,7 +46,7 @@ private val App = FC<Props> {
     val subscription by useState(NodesSubscription())
 
     useEffectOnce {
-        store.dispatch(AddSubscripionClient("localhost", 1313))
+        store.dispatch(AddSubscripionClient("0.0.0.0", 1313))
         sub {
             store.state.subscriptionManager.subscribeAndCollect(
                 subscription,
@@ -62,25 +62,24 @@ private val App = FC<Props> {
     }
 
     useEffect(listOf(colHits, colTime)) {
-        addPlotDiv(colHits, colTime)
+        addPlotDiv(colTime, colHits)
     }
-
+    MutationButtons()
     p {
         +subscription.name()
     }
 }
 
-private fun <X, Y> addPlotDiv(xCol: Col<X>, yCol: Col<Y>) {
+private fun addPlotDiv(xCol: Col<Long>, yCol: Col<Double>) {
     val data = mapOf(
         xCol.name to xCol.data,
         yCol.name to yCol.data,
     )
     var p = letsPlot(data)
-    p += geomLine(color = "red", alpha = 0.3) {
+    p += geomLine(color = "red") {
         x = xCol.name
         y = yCol.name
     }
-    p + ggsize(700, 350)
     val contentDiv = document.getElementById("plot")
     val plotDiv = JsFrontendUtil.createPlotDiv(p)
     contentDiv?.innerHTML = ""
