@@ -9,19 +9,59 @@
 
 package it.unibo.alchemist.component
 
+import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
+import it.unibo.alchemist.boundary.graphql.client.SimulationStatusQuery
 import it.unibo.alchemist.state.AddSubscripionClient
+import it.unibo.alchemist.state.RemoveSubscriptionClient
 import it.unibo.alchemist.state.store
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.w3c.dom.HTMLInputElement
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML.button
+import react.dom.html.ReactHTML.dd
+import react.dom.html.ReactHTML.dl
+import react.dom.html.ReactHTML.dt
+import react.dom.html.ReactHTML.form
+import react.dom.html.ReactHTML.input
+import react.dom.html.ReactHTML.label
+import react.useEffect
 import react.useState
+import web.cssom.ClassName
+import web.timers.Interval
+import web.timers.clearInterval
+import web.timers.setInterval
+import kotlin.time.Duration
 
 val AddSubscriptionClientForm = FC<Props>("AddSubscriptionClientForm") {
+    var clients by useState(listOf<GraphQLClient>())
+    var currentInterval: Interval? by useState(null)
+    var simulationStatuses by useState(emptyMap<GraphQLClient, String?>())
     var inputText by useState("")
 
-    ReactHTML.form {
-        ReactHTML.input {
+    useEffect(clients) {
+        currentInterval?.let {
+            clearInterval(it)
+        }
+        currentInterval = setInterval(Duration.parse("5s")) {
+            MainScope().launch {
+                simulationStatuses = store.state.subscriptionController.query(SimulationStatusQuery()).mapValues { entry ->
+                    entry.value.data?.simulationStatus
+                }
+            }
+        }
+    }
+
+    store.subscribe {
+        clients = store.state.subscriptionController.clients
+    }
+
+    form {
+        label {
+            +"GraphQL Service URL:"
+        }
+        input {
             placeholder = "localhost:8080"
             value = inputText
             onChange = {
@@ -30,7 +70,8 @@ val AddSubscriptionClientForm = FC<Props>("AddSubscriptionClientForm") {
             }
         }
     }
-    ReactHTML.button {
+    button {
+        className = ClassName("btn btn-outline-primary")
         onClick = {
             val port = inputText.split(":").last()
             val address = inputText.removeSuffix(":$port")
@@ -39,10 +80,28 @@ val AddSubscriptionClientForm = FC<Props>("AddSubscriptionClientForm") {
         }
         +"Add client"
     }
-    // Render the list of clients
-    ReactHTML.ul {
-        store.state.subscriptionManager.clients.forEach { client ->
-            ReactHTML.li { +client.serverUrl() }
+    dl {
+        clients.forEach { client ->
+            dt {
+                +"Connected client:"
+            }
+            dd {
+                +"${client.host}:${client.port}"
+                button {
+                    +"Disconnect"
+                    onClick = {
+                        store.dispatch(RemoveSubscriptionClient(client.host, client.port))
+                    }
+                }
+            }
+            dt {
+                +"Simulation status:"
+            }
+            dd {
+                +simulationStatuses[client].let { nullable ->
+                    nullable ?: "Connection not Working"
+                }
+            }
         }
     }
 }

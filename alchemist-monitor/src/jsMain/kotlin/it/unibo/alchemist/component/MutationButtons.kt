@@ -15,21 +15,24 @@ import kotlinx.coroutines.launch
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.button
+import web.cssom.ClassName
 
 val MutationButtons = FC<Props>("MutationButtons") {
     button {
+        ClassName("btn btn-outline-success")
         +"Play"
         onClick = {
             MainScope().launch {
-                store.state.subscriptionManager.play()
+                store.state.subscriptionController.play()
             }
         }
     }
     button {
+        ClassName("btn btn-outline-danger")
         +"Pause"
         onClick = {
             MainScope().launch {
-                store.state.subscriptionManager.pause()
+                store.state.subscriptionController.pause()
             }
         }
     }

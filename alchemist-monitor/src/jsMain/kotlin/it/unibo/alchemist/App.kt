@@ -10,10 +10,11 @@
 package it.unibo.alchemist
 
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
+import it.unibo.alchemist.component.AddSubscriptionClientForm
 import it.unibo.alchemist.component.MutationButtons
 import it.unibo.alchemist.data.Col
 import it.unibo.alchemist.data.mapper.ApolloResponseMapper
-import it.unibo.alchemist.state.AddSubscripionClient
+import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import it.unibo.alchemist.state.store
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
@@ -28,7 +29,6 @@ import react.create
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.p
 import react.useEffect
-import react.useEffectOnce
 import react.useState
 import web.dom.document as webDomDocument
 
@@ -40,15 +40,21 @@ fun main() {
 }
 
 private val App = FC<Props> {
+
+    var subscriptionController by useState(GraphQLSubscriptionController.fromClients(emptyList()))
+
     val (colHits, setColHits) = useState(Col("hits", emptyList<Double>()))
     val (colTime, setColTime) = useState(Col("time", emptyList<Long>()))
 
     val subscription by useState(NodesSubscription())
 
-    useEffectOnce {
-        store.dispatch(AddSubscripionClient("0.0.0.0", 1313))
+    store.subscribe {
+        subscriptionController = store.state.subscriptionController
+    }
+
+    useEffect(subscriptionController) {
         sub {
-            store.state.subscriptionManager.subscribeAndCollect(
+            store.state.subscriptionController.subscribeAndCollect(
                 subscription,
                 ApolloResponseMapper.nodeSubscriptionMapper(),
                 { pair ->
@@ -64,6 +70,7 @@ private val App = FC<Props> {
     useEffect(listOf(colHits, colTime)) {
         addPlotDiv(colTime, colHits)
     }
+    AddSubscriptionClientForm()
     MutationButtons()
     p {
         +subscription.name()

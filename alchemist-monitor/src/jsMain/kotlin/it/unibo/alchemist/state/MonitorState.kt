@@ -13,10 +13,10 @@ import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 
 /**
  * State of the monitor component.
- * @param subscriptionManager the [GraphQLSubscriptionController] that manages the subscriptions.
+ * @param subscriptionController the [GraphQLSubscriptionController] that manages the subscriptions.
  */
 data class MonitorState(
-    val subscriptionManager: GraphQLSubscriptionController =
+    val subscriptionController: GraphQLSubscriptionController =
         GraphQLSubscriptionController.fromClients(emptyList()),
 )
 
@@ -26,5 +26,5 @@ data class MonitorState(
  * @param action the action to be applied.
  */
 fun rootReducer(state: MonitorState, action: Any): MonitorState = MonitorState(
-    subscriptionManager = subscriptionManagerReducer(state.subscriptionManager, action),
+    subscriptionController = subscriptionManagerReducer(state.subscriptionController, action),
 )

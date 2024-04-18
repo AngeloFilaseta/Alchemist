@@ -17,16 +17,13 @@ fun subscriptionManagerReducer(
     action: Any,
 ): GraphQLSubscriptionController = when (action) {
     is AddSubscripionClient -> {
-        GraphQLSubscriptionController.fromClients(
-            state.clients + GraphQLClientFactory.subscriptionClient(action.host, action.port),
-        )
+        GraphQLSubscriptionController.fromClients(state.clients + GraphQLClientFactory.subscriptionClient(action.host, action.port))
     }
     is RemoveSubscriptionClient -> {
         GraphQLSubscriptionController.fromClients(
             state.clients.filterNot {
                 it.host == action.host && it.port == action.port
-            }.onEach {
-                    client ->
+            }.onEach { client ->
                 client.close()
             },
         )
