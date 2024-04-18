@@ -12,6 +12,8 @@ package it.unibo.alchemist.boundary.graphql.server.modules
 import com.expediagroup.graphql.generator.hooks.FlowSubscriptionSchemaGeneratorHooks
 import com.expediagroup.graphql.server.ktor.DefaultKtorGraphQLContextFactory
 import com.expediagroup.graphql.server.ktor.GraphQL
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.serialization.jackson.JacksonWebsocketContentConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -26,15 +28,22 @@ import it.unibo.alchemist.boundary.graphql.schema.operations.subscriptions.Envir
 import it.unibo.alchemist.boundary.graphql.schema.operations.subscriptions.NodeSubscriptions
 import it.unibo.alchemist.model.Environment
 
-// The following values are referred to milliseconds.
-private const val DEFAULT_PING_PERIOD = 1000L
-private const val DEFAULT_TIMEOUT_DURATION = 10000L
-
 /**
  * Ktor module for enabling GraphQL on server.
  */
 fun Application.graphQLModule(environment: Environment<*, *>) {
     install(CORS) {
+        allowMethod(HttpMethod.Options)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+        allowMethod(HttpMethod.Patch)
+        allowHeader(HttpHeaders.Authorization)
+        allowHeader(HttpHeaders.AccessControlAllowOrigin)
+        allowNonSimpleContentTypes = true
+        allowCredentials = true
+        allowSameOrigin = true
+        allowOrigins { true }
+        allowHost("*", listOf("http", "https"))
         anyHost()
     }
 

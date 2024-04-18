@@ -10,8 +10,11 @@
 package it.unibo.alchemist.monitor
 
 import com.apollographql.apollo3.api.ApolloResponse
+import com.apollographql.apollo3.api.Mutation
 import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
+import it.unibo.alchemist.boundary.graphql.client.PauseSimulationMutation
+import it.unibo.alchemist.boundary.graphql.client.PlaySimulationMutation
 import it.unibo.alchemist.data.mapper.ApolloResponseMapper
 import it.unibo.alchemist.monitor.impl.GraphQLSubscriptionControllerImpl
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +30,23 @@ interface GraphQLSubscriptionController {
      * The list of clients to be managed.
      */
     val clients: List<GraphQLClient>
+
+    private suspend fun <D : Mutation.Data> mutation(mutation: Mutation<D>): Map<GraphQLClient, ApolloResponse<D>> =
+        clients.associateWith { client -> client.mutation(mutation).execute() }
+
+    /**
+     * Play all clients.
+     * @return a map of clients and the associated response
+     */
+    suspend fun play(): Map<GraphQLClient, ApolloResponse<PlaySimulationMutation.Data>> =
+        mutation(PlaySimulationMutation())
+
+    /**
+     * Pause all clients.
+     * @return a map of clients and the associated response
+     */
+    suspend fun pause(): Map<GraphQLClient, ApolloResponse<PauseSimulationMutation.Data>> =
+        mutation(PauseSimulationMutation())
 
     /**
      * Subscribe to a given subscription on all clients.
