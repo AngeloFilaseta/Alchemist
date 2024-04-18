@@ -11,6 +11,7 @@ package it.unibo.alchemist.monitor
 
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Mutation
+import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.boundary.graphql.client.PauseSimulationMutation
@@ -30,6 +31,15 @@ interface GraphQLSubscriptionController {
      * The list of clients to be managed.
      */
     val clients: List<GraphQLClient>
+
+    /**
+     * Query all clients with the given query.
+     * @param query the query to be executed.
+     * @return a map of clients and the associated response
+     * @param D the type of the data.
+     */
+    suspend fun <D : Query.Data> query(query: Query<D>): Map<GraphQLClient, ApolloResponse<D>> =
+        clients.associateWith { client -> client.query(query).execute() }
 
     private suspend fun <D : Mutation.Data> mutation(mutation: Mutation<D>): Map<GraphQLClient, ApolloResponse<D>> =
         clients.associateWith { client -> client.mutation(mutation).execute() }
