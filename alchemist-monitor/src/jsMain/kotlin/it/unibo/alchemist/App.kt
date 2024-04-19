@@ -12,13 +12,14 @@ package it.unibo.alchemist
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import it.unibo.alchemist.component.AddSubscriptionClientForm
 import it.unibo.alchemist.component.MutationButtons
-import it.unibo.alchemist.data.Col
-import it.unibo.alchemist.data.mapper.ApolloResponseMapper
+import it.unibo.alchemist.dataframe.Col
+import it.unibo.alchemist.mapper.data.NumberOfHitsMapper
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import it.unibo.alchemist.state.store
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.jetbrains.letsPlot.frontend.JsFrontendUtil
 import org.jetbrains.letsPlot.geom.geomLine
 import org.jetbrains.letsPlot.letsPlot
@@ -58,11 +59,11 @@ private val App = FC<Props> {
         sub {
             store.state.subscriptionController.subscribeAndCollect(
                 subscription,
-                ApolloResponseMapper.nodeSubscriptionMapper(),
-                { pair ->
-                    pair?.let {
-                        setColTime { it + pair.first }
-                        setColHits { it + pair.second }
+                NumberOfHitsMapper(),
+                { avg ->
+                    avg?.let {
+                        setColTime { it + Clock.System.now().toEpochMilliseconds() }
+                        setColHits { it + avg }
                     }
                 },
             )

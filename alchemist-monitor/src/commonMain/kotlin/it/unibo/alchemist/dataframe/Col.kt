@@ -7,7 +7,7 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-package it.unibo.alchemist.data
+package it.unibo.alchemist.dataframe
 
 /**
  * A column of a [DataFrame].

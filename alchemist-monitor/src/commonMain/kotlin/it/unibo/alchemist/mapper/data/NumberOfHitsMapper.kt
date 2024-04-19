@@ -7,26 +7,22 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-package it.unibo.alchemist.data.mapper
+package it.unibo.alchemist.mapper.data
 
-import com.apollographql.apollo3.api.ApolloResponse
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
-import kotlinx.datetime.Clock
 
 /**
- * I will die in a horrible way.
- * TODO: remove me
+ * Map the Nodes to the number of hits.
  */
-class NumberOfHitsMapper : ApolloResponseMapper<NodesSubscription.Data, Pair<Long, Double>?> {
-    override fun invoke(response: ApolloResponse<NodesSubscription.Data>): Pair<Long, Double>? {
-        return response.data?.environment?.nodes?.flatMap { node ->
+class NumberOfHitsMapper : DataMapper<NodesSubscription.Data, Double?> {
+    override val outputName: String = "hits"
+    override fun invoke(data: NodesSubscription.Data?): Double? {
+        return data?.environment?.nodes?.flatMap { node ->
             node.contents.entries.filter {
                 it.molecule.name.contains("hit")
             }.map { entry ->
                 entry.molecule.name.filter { it.isDigit() }.toInt()
             }
-        }?.average()?.let {
-            Clock.System.now().epochSeconds to it
-        }
+        }?.average()
     }
 }
