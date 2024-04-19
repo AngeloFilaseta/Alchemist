@@ -7,17 +7,27 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-package it.unibo.alchemist.state
+package it.unibo.alchemist.state.reducers
 
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClientFactory
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
+import it.unibo.alchemist.state.actions.AddSubscripionClient
+import it.unibo.alchemist.state.actions.RemoveSubscriptionClient
+import it.unibo.alchemist.state.actions.SubscriptionControllerAction
 
+/**
+ * Redux reducer for the subscription manager.
+ * @param state the current state.
+ * @param action the action to apply.
+ */
 fun subscriptionManagerReducer(
     state: GraphQLSubscriptionController,
-    action: Any,
+    action: SubscriptionControllerAction,
 ): GraphQLSubscriptionController = when (action) {
     is AddSubscripionClient -> {
-        GraphQLSubscriptionController.fromClients(state.clients + GraphQLClientFactory.subscriptionClient(action.host, action.port))
+        GraphQLSubscriptionController.fromClients(
+            state.clients + GraphQLClientFactory.subscriptionClient(action.host, action.port),
+        )
     }
     is RemoveSubscriptionClient -> {
         GraphQLSubscriptionController.fromClients(
@@ -28,19 +38,4 @@ fun subscriptionManagerReducer(
             },
         )
     }
-    else -> state
 }
-
-/**
-* Redux action to add a subscription client.
-* @param host the host of the client.
-* @param port the port of the client.
-*/
-data class AddSubscripionClient(val host: String, val port: Int)
-
-/**
- * Redux action to remove a subscription client. It also closes the client.
- * @param host the host of the client.
- * @param port the port of the client.
- */
-data class RemoveSubscriptionClient(val host: String, val port: Int)

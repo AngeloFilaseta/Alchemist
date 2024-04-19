@@ -11,8 +11,8 @@ package it.unibo.alchemist.component
 
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.boundary.graphql.client.SimulationStatusQuery
-import it.unibo.alchemist.state.AddSubscripionClient
-import it.unibo.alchemist.state.RemoveSubscriptionClient
+import it.unibo.alchemist.state.actions.AddSubscripionClient
+import it.unibo.alchemist.state.actions.RemoveSubscriptionClient
 import it.unibo.alchemist.state.store
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -34,22 +34,36 @@ import web.timers.clearInterval
 import web.timers.setInterval
 import kotlin.time.Duration
 
+/**
+ * Component that renders a form suitable for adding subscription clients.
+ */
 val AddSubscriptionClientForm = FC<Props>("AddSubscriptionClientForm") {
     var clients by useState(listOf<GraphQLClient>())
     var currentInterval: Interval? by useState(null)
     var simulationStatuses by useState(emptyMap<GraphQLClient, String?>())
     var inputText by useState("")
 
-    useEffect(clients) {
-        currentInterval?.let {
-            clearInterval(it)
-        }
-        currentInterval = setInterval(Duration.parse("5s")) {
-            MainScope().launch {
-                simulationStatuses = store.state.subscriptionController.query(SimulationStatusQuery()).mapValues { entry ->
-                    entry.value.data?.simulationStatus
-                }
+    /**
+     * Assign the simulation status to each client.
+     */
+    fun assignStatuses() {
+        MainScope().launch {
+            simulationStatuses = store.state.subscriptionController.query(
+                SimulationStatusQuery(),
+            ).mapValues { entry ->
+                entry.value.data?.simulationStatus
             }
+        }
+    }
+
+    /**
+     * Check the simulation status every second.
+     */
+    useEffect(clients) {
+        currentInterval?.let { clearInterval(it) }
+        assignStatuses()
+        currentInterval = setInterval(Duration.parse("1s")) {
+            assignStatuses()
         }
     }
 

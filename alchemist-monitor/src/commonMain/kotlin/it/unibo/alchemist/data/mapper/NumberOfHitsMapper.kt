@@ -13,6 +13,10 @@ import com.apollographql.apollo3.api.ApolloResponse
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import kotlinx.datetime.Clock
 
+/**
+ * I will die in a horrible way.
+ * TODO: remove me
+ */
 class NumberOfHitsMapper : ApolloResponseMapper<NodesSubscription.Data, Pair<Long, Double>?> {
     override fun invoke(response: ApolloResponse<NodesSubscription.Data>): Pair<Long, Double>? {
         return response.data?.environment?.nodes?.flatMap { node ->

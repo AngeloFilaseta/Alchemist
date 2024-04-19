@@ -70,7 +70,7 @@ interface GraphQLSubscriptionController {
     ): Map<GraphQLClient, Flow<ApolloResponse<D>>>
 
     /**
-     * Subscribe to a given subscription on all clients and collect the data into mutable lists
+     * Subscribe to a given subscription on all clients and collect the data into mutable lists.
      * @param subscription the subscription to be executed.
      * @param filter a filter to be applied to the data.
      */

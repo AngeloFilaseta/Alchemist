@@ -13,11 +13,24 @@ import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Subscription.Data
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 
+/**
+ * I will probably change.
+ * TODO: remove me
+ */
 interface ApolloResponseMapper<D : Data, P> {
 
+    /**
+     * I will change.
+     * @param response the response
+     * @return the result
+     */
     fun invoke(response: ApolloResponse<D>): P
 
     companion object {
+        /**
+         * I will die.
+         * @return death
+         */
         fun nodeSubscriptionMapper(): ApolloResponseMapper<NodesSubscription.Data, Pair<Long, Double>?> {
             return NumberOfHitsMapper()
         }

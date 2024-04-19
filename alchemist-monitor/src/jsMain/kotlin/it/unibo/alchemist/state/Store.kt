@@ -14,4 +14,4 @@ import org.reduxkotlin.threadsafe.createThreadSafeStore
 /**
  * The store for the monitor component.
  */
-val store = createThreadSafeStore(::rootReducer, MonitorState())
+val store = createThreadSafeStore(::rootReducer, State())

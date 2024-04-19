@@ -32,8 +32,10 @@ import react.useEffect
 import react.useState
 import web.dom.document as webDomDocument
 
-val scope = MainScope()
-
+/**
+ * Main entry point for the application.
+ * Start rendering the application in the root element using React.js.
+ */
 fun main() {
     val document = webDomDocument.getElementById("root") ?: error("Couldn't find container!")
     createRoot(document).render(App.create())
@@ -95,7 +97,7 @@ private fun addPlotDiv(xCol: Col<Long>, yCol: Col<Double>) {
 
 private fun EffectBuilder.sub(block: suspend () -> Unit) {
     var ignore = false
-    val job = scope.launch {
+    val job = MainScope().launch {
         if (!ignore) {
             block()
         }

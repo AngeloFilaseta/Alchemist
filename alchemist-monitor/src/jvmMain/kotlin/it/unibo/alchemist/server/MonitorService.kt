@@ -11,6 +11,9 @@ package it.unibo.alchemist.server
 
 import io.ktor.server.netty.EngineMain
 
+/**
+ * Start the Ktor server.
+ */
 fun main(args: Array<String>) {
     EngineMain.main(args)
 }

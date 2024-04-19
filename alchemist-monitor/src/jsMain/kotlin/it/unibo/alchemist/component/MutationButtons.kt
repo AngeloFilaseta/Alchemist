@@ -17,6 +17,9 @@ import react.Props
 import react.dom.html.ReactHTML.button
 import web.cssom.ClassName
 
+/**
+ * Component that renders two buttons to play and pause the simulation.
+ */
 val MutationButtons = FC<Props>("MutationButtons") {
     button {
         ClassName("btn btn-outline-success")
