@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.map
 /**
  * Maps the response of a subscription to a list of new data.
  */
-class SubscriptionResponseMapper<D : Subscription.Data>(private val flow: Flow<ApolloResponse<D>>) {
+class SubscriptionMapper<D : Subscription.Data>(private val flow: Flow<ApolloResponse<D>>) {
     /**
      * Maps the response using the given mappers.
      * @param mappers the list of mappers to be used.
