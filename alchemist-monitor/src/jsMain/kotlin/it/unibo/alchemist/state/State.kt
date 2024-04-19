@@ -9,17 +9,24 @@
 
 package it.unibo.alchemist.state
 
+import com.apollographql.apollo3.api.Subscription
+import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
+import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
+import it.unibo.alchemist.state.actions.DataFramesAction
 import it.unibo.alchemist.state.actions.SubscriptionControllerAction
+import it.unibo.alchemist.state.reducers.dataFramesReducer
 import it.unibo.alchemist.state.reducers.subscriptionManagerReducer
 
 /**
  * State of the monitor component.
  * @param subscriptionController the [GraphQLSubscriptionController] that manages the subscriptions.
+ * @param dataframes the dataframes associated with each [Subscription] to each [GraphQLClient].
  */
 data class State(
     val subscriptionController: GraphQLSubscriptionController =
         GraphQLSubscriptionController.fromClients(emptyList()),
+    val dataframes: Map<GraphQLClient, DataFrame> = emptyMap(),
 )
 
 /**
@@ -30,6 +37,9 @@ data class State(
 fun rootReducer(state: State, action: Any): State = when (action) {
     is SubscriptionControllerAction -> state.copy(
         subscriptionController = subscriptionManagerReducer(state.subscriptionController, action),
+    )
+    is DataFramesAction -> state.copy(
+        dataframes = dataFramesReducer(state.dataframes, action),
     )
     else -> state
 }

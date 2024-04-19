@@ -9,20 +9,21 @@
 
 package it.unibo.alchemist
 
+import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import it.unibo.alchemist.component.AddSubscriptionClientForm
 import it.unibo.alchemist.component.MutationButtons
-import it.unibo.alchemist.dataframe.Col
+import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.mapper.data.NumberOfHitsMapper
+import it.unibo.alchemist.mapper.data.TimeMapper
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
+import it.unibo.alchemist.state.actions.Collect
 import it.unibo.alchemist.state.store
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import org.jetbrains.letsPlot.frontend.JsFrontendUtil
 import org.jetbrains.letsPlot.geom.geomLine
-import org.jetbrains.letsPlot.letsPlot
 import react.EffectBuilder
 import react.FC
 import react.Props
@@ -45,50 +46,46 @@ fun main() {
 private val App = FC<Props> {
 
     var subscriptionController by useState(GraphQLSubscriptionController.fromClients(emptyList()))
-
-    val (colHits, setColHits) = useState(Col("hits", emptyList<Double>()))
-    val (colTime, setColTime) = useState(Col("time", emptyList<Long>()))
+    var dataframes by useState(emptyMap<GraphQLClient, DataFrame>())
 
     val subscription by useState(NodesSubscription())
 
     store.subscribe {
         subscriptionController = store.state.subscriptionController
+        dataframes = store.state.dataframes
     }
 
     useEffect(subscriptionController) {
         sub {
             store.state.subscriptionController.subscribeAndCollect(
                 subscription,
-                NumberOfHitsMapper(),
-                { avg ->
-                    avg?.let {
-                        setColTime { it + Clock.System.now().toEpochMilliseconds() }
-                        setColHits { it + avg }
+                listOf(NumberOfHitsMapper(), TimeMapper()),
+                { client, name, flow ->
+                    flow.collect {
+                        console.log("collectiong: $client $name $it")
+                        store.dispatch(Collect(client, name, it))
                     }
                 },
             )
         }
     }
 
-    useEffect(listOf(colHits, colTime)) {
-        addPlotDiv(colTime, colHits)
+    useEffect(listOf(dataframes)) {
+        addPlotDiv(dataframes.values.first())
     }
+
     AddSubscriptionClientForm()
     MutationButtons()
+
     p {
-        +subscription.name()
+        +"Current Subscription: ${subscription.name()}"
     }
 }
 
-private fun addPlotDiv(xCol: Col<Long>, yCol: Col<Double>) {
-    val data = mapOf(
-        xCol.name to xCol.data,
-        yCol.name to yCol.data,
-    )
-    var p = letsPlot(data)
-    p += geomLine(color = "red") {
-        x = xCol.name
-        y = yCol.name
+private fun addPlotDiv(df: DataFrame) {
+    val p = df.toPlot() + geomLine(color = "red") {
+        x = "time"
+        y = "hits"
     }
     val contentDiv = document.getElementById("plot")
     val plotDiv = JsFrontendUtil.createPlotDiv(p)

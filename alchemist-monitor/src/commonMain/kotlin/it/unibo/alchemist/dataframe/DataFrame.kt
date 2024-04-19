@@ -20,7 +20,18 @@ import org.jetbrains.letsPlot.pos.positionFill
  * A data frame, containing a list of columns.
  * @property cols the columns of the data frame.
  */
-data class DataFrame(private val cols: List<Col<Any>>) {
+data class DataFrame internal constructor(private val cols: List<Col<Any?>>) {
+
+    /**
+     * Add a new column to the data frame.
+     * @return a new data frame with the new data added.
+     */
+    fun add(colName: String, data: Any?): DataFrame {
+        val newCol = (cols.find { it.name == colName } ?: Col(colName, emptyList())) + data
+        val newCols = cols.filter { it.name != colName } + newCol
+        return DataFrame(newCols)
+    }
+
     /**
      * Create a [Plot] using the data frame.
      */
@@ -34,5 +45,20 @@ data class DataFrame(private val cols: List<Col<Any>>) {
             y = "hits"
         }
         return plot
+    }
+
+    companion object {
+        /**
+         * Create a new data frame with the given columns.
+         * @param cols the columns of the data frame.
+         */
+        fun fromCols(vararg cols: Col<Any?>): DataFrame = DataFrame(cols.toList())
+
+        /**
+         * Create a new data frame with a single column.
+         * @param colName the name of the column.
+         * @param data the data of the column.
+         */
+        fun singleCol(colName: String, vararg data: Any?): DataFrame = fromCols(Col(colName, data.toList()))
     }
 }

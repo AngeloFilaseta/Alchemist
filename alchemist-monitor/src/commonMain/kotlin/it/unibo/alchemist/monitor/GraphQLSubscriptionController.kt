@@ -17,10 +17,9 @@ import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.boundary.graphql.client.PauseSimulationMutation
 import it.unibo.alchemist.boundary.graphql.client.PlaySimulationMutation
 import it.unibo.alchemist.mapper.data.DataMapper
+import it.unibo.alchemist.mapper.response.SubscriptionMapper
 import it.unibo.alchemist.monitor.impl.GraphQLSubscriptionControllerImpl
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.map
 
 /**
  * Handle the subscription to the Alchemist subscription clients.
@@ -74,16 +73,16 @@ interface GraphQLSubscriptionController {
      * @param subscription the subscription to be executed.
      * @param filter a filter to be applied to the data.
      */
-    suspend fun <D : Subscription.Data, O> subscribeAndCollect(
+    suspend fun <D : Subscription.Data> subscribeAndCollect(
         subscription: Subscription<D>,
-        mapper: DataMapper<D, O>,
-        collector: FlowCollector<O>,
+        mappers: List<DataMapper<D, Any?>>,
+        namedFlowCollector: suspend (GraphQLClient, String, Flow<Any?>) -> Unit,
         filter: (D) -> Boolean = { true },
     ) {
         subscribe(subscription, filter).mapValues { entry ->
-            entry.value.map { response ->
-                mapper.invoke(response.data)
-            }.collect(collector)
+            SubscriptionMapper(entry.value).mapUsing(mappers).forEach {
+                namedFlowCollector(entry.key, it.key, it.value)
+            }
         }
     }
 
