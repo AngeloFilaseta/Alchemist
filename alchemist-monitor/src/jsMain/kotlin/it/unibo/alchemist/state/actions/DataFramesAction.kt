@@ -26,3 +26,8 @@ class Collect<D>(
     val client: GraphQLClient,
     val data: List<Pair<String, D>>,
 ) : DataFramesAction
+
+/**
+ * Clear the [DataFrame]s.
+ */
+data object DataFrameClear : DataFramesAction

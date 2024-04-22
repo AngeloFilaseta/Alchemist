@@ -9,6 +9,7 @@
 
 package it.unibo.alchemist
 
+import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import it.unibo.alchemist.component.AddSubscriptionClientForm
@@ -18,6 +19,7 @@ import it.unibo.alchemist.mapper.data.NumberOfHitsMapper
 import it.unibo.alchemist.mapper.data.TimeMapper
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import it.unibo.alchemist.state.actions.Collect
+import it.unibo.alchemist.state.actions.SetSubscription
 import it.unibo.alchemist.state.store
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
@@ -32,6 +34,7 @@ import react.create
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.p
 import react.useEffect
+import react.useEffectOnce
 import react.useState
 import web.dom.document as webDomDocument
 
@@ -49,21 +52,32 @@ private val App = FC<Props> {
     var subscriptionController by useState(GraphQLSubscriptionController.fromClients(emptyList()))
     var dataframes by useState(emptyMap<GraphQLClient, DataFrame>())
 
-    val subscription by useState(NodesSubscription())
+    var subscription by useState<Subscription<*>?>(NodesSubscription())
 
     store.subscribe {
         subscriptionController = store.state.subscriptionController
+        subscription = store.state.currentSubscription
         dataframes = store.state.dataframes
     }
 
+    useEffectOnce {
+        store.dispatch(SetSubscription(NodesSubscription()))
+    }
     useEffect(subscriptionController) {
-        sub {
-            val mappers = listOf(TimeMapper(), NumberOfHitsMapper())
-            store.state.subscriptionController.subscribe(subscription).mapValues { (client, flow) ->
-                flow.collect { response ->
-                    store.dispatch(
-                        Collect(client, mappers.map { m -> m.outputName to m.invoke(response.data) }),
-                    )
+        subscription?.let {
+            sub {
+                val mappers = listOf(TimeMapper(), NumberOfHitsMapper())
+                store.state.subscriptionController.subscribe(it).mapValues { (client, flow) ->
+                    flow.collect { response ->
+                        store.dispatch(
+                            Collect(
+                                client,
+                                mappers.map { m ->
+                                    m.outputName to m.invoke(response.data as NodesSubscription.Data)
+                                },
+                            ),
+                        )
+                    }
                 }
             }
         }
@@ -77,7 +91,7 @@ private val App = FC<Props> {
     MutationButtons()
 
     p {
-        +"Current Subscription: ${subscription.name()}"
+        +"Current Subscription: ${subscription?.name()}"
     }
 }
 

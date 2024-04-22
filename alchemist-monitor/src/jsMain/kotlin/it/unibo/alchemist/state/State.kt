@@ -14,9 +14,11 @@ import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import it.unibo.alchemist.state.actions.DataFramesAction
+import it.unibo.alchemist.state.actions.SubscriptionAction
 import it.unibo.alchemist.state.actions.SubscriptionControllerAction
 import it.unibo.alchemist.state.reducers.dataFramesReducer
 import it.unibo.alchemist.state.reducers.subscriptionManagerReducer
+import it.unibo.alchemist.state.reducers.subscriptionReducer
 
 /**
  * State of the monitor component.
@@ -26,6 +28,7 @@ import it.unibo.alchemist.state.reducers.subscriptionManagerReducer
 data class State(
     val subscriptionController: GraphQLSubscriptionController =
         GraphQLSubscriptionController.fromClients(emptyList()),
+    val currentSubscription: Subscription<*>? = null,
     val dataframes: Map<GraphQLClient, DataFrame> = emptyMap(),
 )
 
@@ -37,6 +40,9 @@ data class State(
 fun rootReducer(state: State, action: Any): State = when (action) {
     is SubscriptionControllerAction -> state.copy(
         subscriptionController = subscriptionManagerReducer(state.subscriptionController, action),
+    )
+    is SubscriptionAction -> state.copy(
+        currentSubscription = subscriptionReducer(action),
     )
     is DataFramesAction -> state.copy(
         dataframes = dataFramesReducer(state.dataframes, action),

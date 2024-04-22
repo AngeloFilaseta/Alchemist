@@ -9,26 +9,23 @@
 
 package it.unibo.alchemist.state.reducers
 
-import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
+import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.dataframe.DataFrame
-import it.unibo.alchemist.state.actions.Collect
 import it.unibo.alchemist.state.actions.DataFrameClear
-import it.unibo.alchemist.state.actions.DataFramesAction
+import it.unibo.alchemist.state.actions.SetSubscription
+import it.unibo.alchemist.state.actions.SubscriptionAction
+import it.unibo.alchemist.state.store
 
 /**
  * Redux reducer for the [DataFrame]s.
  */
-fun dataFramesReducer(
-    state: Map<GraphQLClient, DataFrame>,
-    action: DataFramesAction,
-): Map<GraphQLClient, DataFrame> {
+fun subscriptionReducer(
+    action: SubscriptionAction,
+): Subscription<*> {
     return when (action) {
-        is Collect<*> -> {
-            val df = action.data.fold(state[action.client] ?: DataFrame.empty()) { acc, d ->
-                acc.add(d.first, d.second)
-            }
-            state + (action.client to df)
+        is SetSubscription<*> -> {
+            store.dispatch(DataFrameClear)
+            action.subscription
         }
-        is DataFrameClear -> emptyMap()
     }
 }
