@@ -11,7 +11,6 @@ package it.unibo.alchemist
 
 import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
-import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import it.unibo.alchemist.component.AddSubscriptionClientForm
 import it.unibo.alchemist.component.MutationButtons
 import it.unibo.alchemist.component.SelectSubscriptionForm
@@ -68,7 +67,7 @@ private val App = FC<Props> {
                             Collect(
                                 client,
                                 mappers.map { m ->
-                                    m.outputName to m.invoke(response.data as NodesSubscription.Data)
+                                    m.outputName to m.invoke(response.data)
                                 },
                             ),
                         )
