@@ -9,20 +9,26 @@
 
 package it.unibo.alchemist.mapper.data
 
+import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 
 /**
  * Map the Nodes to the number of hits.
  */
-class NumberOfHitsMapper : DataMapper<NodesSubscription.Data, Double?> {
+class NumberOfHitsMapper : DataMapper<Subscription.Data, Double?> {
     override val outputName: String = "hits"
-    override fun invoke(data: NodesSubscription.Data?): Double? {
-        return data?.environment?.nodes?.flatMap { node ->
-            node.contents.entries.filter {
-                it.molecule.name.contains("hit")
-            }.map { entry ->
-                entry.molecule.name.filter { it.isDigit() }.toInt()
+    override fun invoke(data: Subscription.Data?): Double? {
+        return when (data) {
+            is NodesSubscription.Data -> {
+                return data.environment.nodes.flatMap { node ->
+                    node.contents.entries.filter {
+                        it.molecule.name.contains("hit")
+                    }.map { entry ->
+                        entry.molecule.name.filter { it.isDigit() }.toInt()
+                    }
+                }.average()
             }
-        }?.average()
+            else -> null
+        }
     }
 }

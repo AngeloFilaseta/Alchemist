@@ -9,13 +9,13 @@
 
 package it.unibo.alchemist.mapper.data
 
-import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
+import com.apollographql.apollo3.api.Subscription
 import kotlinx.datetime.Clock
 
 /**
  * Map the reception of data to the current time.
  */
-class TimeMapper : DataMapper<NodesSubscription.Data, Long> {
+class TimeMapper : DataMapper<Subscription.Data, Long> {
     override val outputName: String = "time"
-    override fun invoke(data: NodesSubscription.Data?): Long = Clock.System.now().toEpochMilliseconds()
+    override fun invoke(data: Subscription.Data?): Long = Clock.System.now().toEpochMilliseconds()
 }
