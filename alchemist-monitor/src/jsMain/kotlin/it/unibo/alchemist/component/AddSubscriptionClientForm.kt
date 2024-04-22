@@ -76,7 +76,7 @@ val AddSubscriptionClientForm = FC<Props>("AddSubscriptionClientForm") {
             +"GraphQL Service URL:"
         }
         input {
-            placeholder = "localhost:8080"
+            placeholder = "Client Address (ex: localhost:8080)"
             value = inputText
             onChange = {
                 @Suppress("CAST_NEVER_SUCCEEDS")
@@ -97,7 +97,7 @@ val AddSubscriptionClientForm = FC<Props>("AddSubscriptionClientForm") {
     dl {
         clients.forEach { client ->
             dt {
-                +"Connected client:"
+                +"Connected clients:"
             }
             dd {
                 +"${client.host}:${client.port}"

@@ -23,11 +23,9 @@ fun dataFramesReducer(
 ): Map<GraphQLClient, DataFrame> {
     return when (action) {
         is Collect<*> -> {
-            val df = (
-                state[action.client]
-                    ?.add(action.colName, action.data)
-                    ?: DataFrame.singleCol(action.colName, action.data)
-                )
+            val df = action.data.fold(state[action.client] ?: DataFrame.empty()) { acc, d ->
+                acc.add(d.first, d.second)
+            }
             state + (action.client to df)
         }
     }

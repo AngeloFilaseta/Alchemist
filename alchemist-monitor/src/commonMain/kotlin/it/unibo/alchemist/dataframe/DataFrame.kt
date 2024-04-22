@@ -9,12 +9,8 @@
 
 package it.unibo.alchemist.dataframe
 
-import org.jetbrains.letsPlot.Stat
-import org.jetbrains.letsPlot.geom.geomLine
 import org.jetbrains.letsPlot.intern.Plot
-import org.jetbrains.letsPlot.label.xlab
 import org.jetbrains.letsPlot.letsPlot
-import org.jetbrains.letsPlot.pos.positionFill
 
 /**
  * A data frame, containing a list of columns.
@@ -34,31 +30,18 @@ data class DataFrame internal constructor(private val cols: List<Col<Any?>>) {
 
     /**
      * Create a [Plot] using the data frame.
+     * @return a plot using the data frame.
      */
-    fun toPlot(): Plot {
-        val plot = letsPlot(cols.associate { it.name to it.data }) + geomLine(
-            stat = Stat.identity,
-            position = positionFill(),
-        ) {
-            x = "time"
-            xlab("Time")
-            y = "hits"
-        }
-        return plot
+    fun toPlot(): Plot = letsPlot(cols.associate { it.name to it.data })
+
+    override fun toString(): String {
+        return "DataFrame(${cols.map { col -> col.name + ": " + col.data}})"
     }
 
     companion object {
         /**
-         * Create a new data frame with the given columns.
-         * @param cols the columns of the data frame.
+         * Create an empty data frame.
          */
-        fun fromCols(vararg cols: Col<Any?>): DataFrame = DataFrame(cols.toList())
-
-        /**
-         * Create a new data frame with a single column.
-         * @param colName the name of the column.
-         * @param data the data of the column.
-         */
-        fun singleCol(colName: String, vararg data: Any?): DataFrame = fromCols(Col(colName, data.toList()))
+        fun empty(): DataFrame = DataFrame(emptyList())
     }
 }

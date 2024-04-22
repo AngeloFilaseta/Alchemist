@@ -17,10 +17,12 @@ import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 sealed interface DataFramesAction
 
 /**
- * Collect a new data point in a [DataFrame].
- * @param client the [GraphQLClient] associated with the [DataFrame].
- * @param colName the name of the column to add.
- * @param data the data to add.
+ * Collect data from a [GraphQLClient].
  * @param D the type of the data.
+ * @param client the client to collect data from.
+ * @param data the data to collect. It consists of a list data that will be put in every column of the [DataFrame].
  */
-class Collect<D>(val client: GraphQLClient, val colName: String, val data: D) : DataFramesAction
+class Collect<D>(
+    val client: GraphQLClient,
+    val data: List<Pair<String, D>>,
+) : DataFramesAction

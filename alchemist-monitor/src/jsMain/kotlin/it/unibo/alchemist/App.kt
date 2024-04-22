@@ -24,6 +24,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.jetbrains.letsPlot.frontend.JsFrontendUtil
 import org.jetbrains.letsPlot.geom.geomLine
+import org.jetbrains.letsPlot.intern.Plot
 import react.EffectBuilder
 import react.FC
 import react.Props
@@ -57,21 +58,19 @@ private val App = FC<Props> {
 
     useEffect(subscriptionController) {
         sub {
-            store.state.subscriptionController.subscribeAndCollect(
-                subscription,
-                listOf(NumberOfHitsMapper(), TimeMapper()),
-                { client, name, flow ->
-                    flow.collect {
-                        console.log("collectiong: $client $name $it")
-                        store.dispatch(Collect(client, name, it))
-                    }
-                },
-            )
+            val mappers = listOf(TimeMapper(), NumberOfHitsMapper())
+            store.state.subscriptionController.subscribe(subscription).mapValues { (client, flow) ->
+                flow.collect { response ->
+                    store.dispatch(
+                        Collect(client, mappers.map { m -> m.outputName to m.invoke(response.data) }),
+                    )
+                }
+            }
         }
     }
 
     useEffect(listOf(dataframes)) {
-        addPlotDiv(dataframes.values.first())
+        addPlotDiv(dataframes)
     }
 
     AddSubscriptionClientForm()
@@ -82,15 +81,21 @@ private val App = FC<Props> {
     }
 }
 
-private fun addPlotDiv(df: DataFrame) {
-    val p = df.toPlot() + geomLine(color = "red") {
+private fun addPlotDiv(map: Map<GraphQLClient, DataFrame>) {
+    val contentDiv = document.getElementById("plot")
+    contentDiv?.innerHTML = ""
+    map.forEach { (_, df) ->
+        console.log(df)
+        val plotDiv = JsFrontendUtil.createPlotDiv(generatePlot(df))
+        contentDiv?.appendChild(plotDiv)
+    }
+}
+
+private fun generatePlot(df: DataFrame): Plot {
+    return df.toPlot() + geomLine(color = "red") {
         x = "time"
         y = "hits"
     }
-    val contentDiv = document.getElementById("plot")
-    val plotDiv = JsFrontendUtil.createPlotDiv(p)
-    contentDiv?.innerHTML = ""
-    contentDiv?.appendChild(plotDiv)
 }
 
 private fun EffectBuilder.sub(block: suspend () -> Unit) {
