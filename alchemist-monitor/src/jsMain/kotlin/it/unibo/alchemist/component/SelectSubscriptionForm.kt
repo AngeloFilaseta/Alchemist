@@ -16,6 +16,7 @@ import react.FC
 import react.Props
 import react.dom.html.ReactHTML.option
 import react.dom.html.ReactHTML.select
+import react.useState
 import web.cssom.ClassName
 
 /**
@@ -23,11 +24,12 @@ import web.cssom.ClassName
  */
 val SelectSubscriptionForm = FC<Props>("MutationButtons") {
 
-    val subscriptions = listOf(NodesSubscription()).associateBy { it.name() }
+    val subscriptions by useState(listOf(NodesSubscription()).associateBy { it.name() })
 
     select {
         onChange = { event ->
             subscriptions[event.target.value]?.let {
+                console.log("Selected subscription: $it")
                 store.dispatch(SetSubscription(it))
             }
         }

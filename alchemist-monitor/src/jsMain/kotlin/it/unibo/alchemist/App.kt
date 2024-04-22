@@ -14,12 +14,12 @@ import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import it.unibo.alchemist.component.AddSubscriptionClientForm
 import it.unibo.alchemist.component.MutationButtons
+import it.unibo.alchemist.component.SelectSubscriptionForm
 import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.mapper.data.NumberOfHitsMapper
 import it.unibo.alchemist.mapper.data.TimeMapper
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import it.unibo.alchemist.state.actions.Collect
-import it.unibo.alchemist.state.actions.SetSubscription
 import it.unibo.alchemist.state.store
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
@@ -34,7 +34,6 @@ import react.create
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.p
 import react.useEffect
-import react.useEffectOnce
 import react.useState
 import web.dom.document as webDomDocument
 
@@ -51,8 +50,7 @@ private val App = FC<Props> {
 
     var subscriptionController by useState(GraphQLSubscriptionController.fromClients(emptyList()))
     var dataframes by useState(emptyMap<GraphQLClient, DataFrame>())
-
-    var subscription by useState<Subscription<*>?>(NodesSubscription())
+    var subscription by useState<Subscription<*>?>(null)
 
     store.subscribe {
         subscriptionController = store.state.subscriptionController
@@ -60,10 +58,7 @@ private val App = FC<Props> {
         dataframes = store.state.dataframes
     }
 
-    useEffectOnce {
-        store.dispatch(SetSubscription(NodesSubscription()))
-    }
-    useEffect(subscriptionController) {
+    useEffect(subscriptionController, subscription) {
         subscription?.let {
             sub {
                 val mappers = listOf(TimeMapper(), NumberOfHitsMapper())
@@ -88,6 +83,7 @@ private val App = FC<Props> {
     }
 
     AddSubscriptionClientForm()
+    SelectSubscriptionForm()
     MutationButtons()
 
     p {
