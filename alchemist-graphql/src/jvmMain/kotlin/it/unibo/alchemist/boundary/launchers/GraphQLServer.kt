@@ -26,6 +26,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
+import org.slf4j.LoggerFactory
+
+private val logger = LoggerFactory.getLogger(GraphQLServer::class.java)
 
 /**
  * An [OutputMonitor] observing the [environment] through a GraphQL server listening on [host]:[port].
@@ -59,6 +62,9 @@ class GraphQLServer<T, P : Position<out P>> @JvmOverloads constructor(
             },
             "alchemist-graphql-server@$host:$port",
         ).start()
+        runBlocking {
+            logger.info("Starting GraphQL server at $host:${server.resolvedConnectors().first().port}")
+        }
         mutex.acquireUninterruptibly()
     }
 
