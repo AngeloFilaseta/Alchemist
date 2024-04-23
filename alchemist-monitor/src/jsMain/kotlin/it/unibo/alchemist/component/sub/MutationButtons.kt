@@ -7,7 +7,7 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-package it.unibo.alchemist.component
+package it.unibo.alchemist.component.sub
 
 import it.unibo.alchemist.state.store
 import kotlinx.coroutines.MainScope
@@ -15,27 +15,33 @@ import kotlinx.coroutines.launch
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.button
+import react.dom.html.ReactHTML.div
 import web.cssom.ClassName
+import web.html.ButtonType
 
 /**
  * Component that renders two buttons to play and pause the simulation.
  */
 val MutationButtons = FC<Props>("MutationButtons") {
-    button {
-        ClassName("btn btn-outline-success")
-        +"Play"
-        onClick = {
-            MainScope().launch {
-                store.state.subscriptionController.play()
+    div {
+        button {
+            className = ClassName("btn btn-primary")
+            type = ButtonType.button
+            +"Play"
+            onClick = {
+                MainScope().launch {
+                    store.state.subscriptionController.play()
+                }
             }
         }
-    }
-    button {
-        ClassName("btn btn-outline-danger")
-        +"Pause"
-        onClick = {
-            MainScope().launch {
-                store.state.subscriptionController.pause()
+        button {
+            className = ClassName("btn btn-secondary")
+            type = ButtonType.button
+            +"Pause"
+            onClick = {
+                MainScope().launch {
+                    store.state.subscriptionController.pause()
+                }
             }
         }
     }

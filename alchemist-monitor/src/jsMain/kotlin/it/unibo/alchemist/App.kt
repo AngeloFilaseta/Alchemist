@@ -11,9 +11,9 @@ package it.unibo.alchemist
 
 import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
-import it.unibo.alchemist.component.AddSubscriptionClientForm
-import it.unibo.alchemist.component.MutationButtons
-import it.unibo.alchemist.component.SelectSubscriptionForm
+import it.unibo.alchemist.component.Form
+import it.unibo.alchemist.component.Info
+import it.unibo.alchemist.component.Navbar
 import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.mapper.data.NumberOfHitsMapper
 import it.unibo.alchemist.mapper.data.TimeMapper
@@ -31,9 +31,10 @@ import react.FC
 import react.Props
 import react.create
 import react.dom.client.createRoot
-import react.dom.html.ReactHTML.p
+import react.dom.html.ReactHTML.div
 import react.useEffect
 import react.useState
+import web.cssom.ClassName
 import web.dom.document as webDomDocument
 
 /**
@@ -81,12 +82,14 @@ private val App = FC<Props> {
         addPlotDiv(dataframes)
     }
 
-    AddSubscriptionClientForm()
-    SelectSubscriptionForm()
-    MutationButtons()
-
-    p {
-        +"Current Subscription: ${subscription?.name()}"
+    Navbar()
+    div {
+        className = ClassName("row")
+        Form()
+        Info {
+            clients = subscriptionController.clients
+            currentSubscription = subscription
+        }
     }
 }
 

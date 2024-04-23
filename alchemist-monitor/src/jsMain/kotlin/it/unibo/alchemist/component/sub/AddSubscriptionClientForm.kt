@@ -7,12 +7,11 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-package it.unibo.alchemist.component
+package it.unibo.alchemist.component.sub
 
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.boundary.graphql.client.SimulationStatusQuery
 import it.unibo.alchemist.state.actions.AddSubscripionClient
-import it.unibo.alchemist.state.actions.RemoveSubscriptionClient
 import it.unibo.alchemist.state.store
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -20,12 +19,7 @@ import org.w3c.dom.HTMLInputElement
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.button
-import react.dom.html.ReactHTML.dd
-import react.dom.html.ReactHTML.dl
-import react.dom.html.ReactHTML.dt
-import react.dom.html.ReactHTML.form
 import react.dom.html.ReactHTML.input
-import react.dom.html.ReactHTML.label
 import react.useEffect
 import react.useState
 import web.cssom.ClassName
@@ -71,21 +65,17 @@ val AddSubscriptionClientForm = FC<Props>("AddSubscriptionClientForm") {
         clients = store.state.subscriptionController.clients
     }
 
-    form {
-        label {
-            +"GraphQL Service URL:"
-        }
-        input {
-            placeholder = "Client Address (ex: localhost:8080)"
-            value = inputText
-            onChange = {
-                @Suppress("CAST_NEVER_SUCCEEDS")
-                inputText = (it.target as HTMLInputElement).value
-            }
+    input {
+        className = ClassName("form-control me-sm-2")
+        placeholder = "Client Address (ex: localhost:8080)"
+        value = inputText
+        onChange = {
+            @Suppress("CAST_NEVER_SUCCEEDS")
+            inputText = (it.target as HTMLInputElement).value
         }
     }
     button {
-        className = ClassName("btn btn-outline-primary")
+        className = ClassName("btn btn-secondary pr-2")
         onClick = {
             val port = inputText.split(":").last()
             val address = inputText.removeSuffix(":$port")
@@ -93,29 +83,5 @@ val AddSubscriptionClientForm = FC<Props>("AddSubscriptionClientForm") {
             inputText = ""
         }
         +"Add client"
-    }
-    dl {
-        clients.forEach { client ->
-            dt {
-                +"Connected clients:"
-            }
-            dd {
-                +"${client.host}:${client.port}"
-                button {
-                    +"Disconnect"
-                    onClick = {
-                        store.dispatch(RemoveSubscriptionClient(client.host, client.port))
-                    }
-                }
-            }
-            dt {
-                +"Simulation status:"
-            }
-            dd {
-                +simulationStatuses[client].let { nullable ->
-                    nullable ?: "Connection not Working"
-                }
-            }
-        }
     }
 }

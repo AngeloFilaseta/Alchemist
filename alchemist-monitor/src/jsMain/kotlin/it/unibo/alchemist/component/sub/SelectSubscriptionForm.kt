@@ -7,7 +7,7 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-package it.unibo.alchemist.component
+package it.unibo.alchemist.component.sub
 
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import it.unibo.alchemist.state.actions.SetSubscription
