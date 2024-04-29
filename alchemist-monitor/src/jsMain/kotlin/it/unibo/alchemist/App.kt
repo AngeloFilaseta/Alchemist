@@ -63,15 +63,18 @@ private val App = FC<Props> {
             sub {
                 val mappers = listOf(TimeMapper(), NumberOfHitsMapper())
                 store.state.subscriptionController.subscribe(it).mapValues { (client, flow) ->
-                    flow.collect { response ->
-                        store.dispatch(
-                            Collect(
-                                client,
-                                mappers.map { m ->
-                                    m.outputName to m.invoke(response.data)
-                                },
-                            ),
-                        )
+                    MainScope().launch {
+                        flow.collect { response ->
+                            console.log("collecting...")
+                            store.dispatch(
+                                Collect(
+                                    client,
+                                    mappers.map { m ->
+                                        m.outputName to m.invoke(response.data)
+                                    },
+                                ),
+                            )
+                        }
                     }
                 }
             }
