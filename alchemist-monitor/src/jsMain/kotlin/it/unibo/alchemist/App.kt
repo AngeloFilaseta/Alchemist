@@ -99,10 +99,15 @@ private val App = FC<Props> {
 private fun addPlotDiv(map: Map<GraphQLClient, DataFrame>) {
     val contentDiv = document.getElementById("plot")
     contentDiv?.innerHTML = ""
-    map.forEach { (_, df) ->
+    map.forEach { (client, df) ->
         console.log(df)
         val plotDiv = JsFrontendUtil.createPlotDiv(generatePlot(df))
         contentDiv?.appendChild(plotDiv)
+        contentDiv?.appendChild(
+            document.createElement("p").apply {
+                innerHTML = "Data from client ${client.serverUrl()}"
+            },
+        )
     }
 }
 
