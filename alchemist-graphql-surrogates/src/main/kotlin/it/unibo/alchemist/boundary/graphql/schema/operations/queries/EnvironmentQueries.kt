@@ -33,4 +33,10 @@ class EnvironmentQueries<T, P : Position<out P>>(private val environment: Enviro
      */
     @GraphQLDescription("The status of the simulation")
     fun simulationStatus() = this.environment.simulation.status.toString()
+
+    /**
+     * The time of the simulation.
+     */
+    @GraphQLDescription("The time of the simulation")
+    fun simulationTime() = this.environment.simulation.time.toDouble()
 }
