@@ -14,9 +14,10 @@ import org.jetbrains.letsPlot.letsPlot
 
 /**
  * A data frame, containing a list of columns.
- * @property cols the columns of the data frame.
  */
-data class DataFrame internal constructor(private val cols: List<Col<Any?>>) {
+interface DataFrame {
+
+    val cols: List<Col<Any?>>
 
     /**
      * Add a new column to the data frame.
@@ -25,7 +26,7 @@ data class DataFrame internal constructor(private val cols: List<Col<Any?>>) {
     fun add(colName: String, data: Any?): DataFrame {
         val newCol = (cols.find { it.name == colName } ?: Col(colName, emptyList())) + data
         val newCols = cols.filter { it.name != colName } + newCol
-        return DataFrame(newCols)
+        return DataFrameImpl(newCols)
     }
 
     /**
@@ -34,14 +35,25 @@ data class DataFrame internal constructor(private val cols: List<Col<Any?>>) {
      */
     fun toPlot(): Plot = letsPlot(cols.associate { it.name to it.data })
 
-    override fun toString(): String {
-        return "DataFrame(${cols.map { col -> col.name + ": " + col.data}})"
-    }
-
     companion object {
         /**
          * Create an empty data frame.
          */
-        fun empty(): DataFrame = DataFrame(emptyList())
+        fun empty(): DataFrame = DataFrameImpl(emptyList())
+
+        /**
+         * Create a data frame from a list of columns.
+         */
+        fun fromCols(cols: List<Col<Any?>>): DataFrame = DataFrameImpl(cols)
+    }
+}
+
+/**
+ * A data frame, containing a list of columns.
+ * @property cols the columns of the data frame.
+ */
+data class DataFrameImpl internal constructor(override val cols: List<Col<Any?>>) : DataFrame {
+    override fun toString(): String {
+        return "DataFrame(${cols.map { col -> col.name + ": " + col.data}})"
     }
 }

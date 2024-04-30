@@ -10,7 +10,9 @@
 package it.unibo.alchemist
 
 import com.apollographql.apollo3.api.Subscription
+import it.unibo.alchemist.boundary.graphql.client.ConcentrationSubscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
+import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import it.unibo.alchemist.component.Form
 import it.unibo.alchemist.component.Info
 import it.unibo.alchemist.component.Navbar
@@ -54,7 +56,8 @@ private val App = FC<Props> {
 
     store.subscribe {
         subscriptionController = store.state.subscriptionController
-        subscription = store.state.currentSubscription
+        // TODO subscription = store.state.currentSubscription
+        subscription = ConcentrationSubscription("localSuccess")
         dataframes = store.state.dataframes
     }
 
@@ -65,12 +68,14 @@ private val App = FC<Props> {
                 store.state.subscriptionController.subscribe(it).mapValues { (client, flow) ->
                     MainScope().launch {
                         flow.collect { response ->
-                            console.log("collecting...")
                             store.dispatch(
                                 Collect(
                                     client,
-                                    mappers.map { m ->
-                                        m.outputName to m.invoke(response.data)
+                                    when (response.data) {
+                                        is NodesSubscription.Data -> mappers.map { m ->
+                                            m.outputName to m.invoke(response.data as NodesSubscription.Data)
+                                        }
+                                        else -> listOf()
                                     },
                                 ),
                             )

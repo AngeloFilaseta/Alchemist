@@ -1,13 +1,16 @@
 subscription NodesSubscription {
-    simulationTime
-    environment {
-        nodes {
-            contents {
-                entries {
-                    molecule {
-                        name
+    simulation {
+        status
+        time
+        environment {
+            nodes {
+                contents {
+                    entries {
+                        molecule {
+                            name
+                        }
+                        concentration
                     }
-                    concentration
                 }
             }
         }

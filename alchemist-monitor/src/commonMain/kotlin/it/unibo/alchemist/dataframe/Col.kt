@@ -20,4 +20,11 @@ data class Col<D>(val name: String, val data: List<D>) {
      * Add a new element to the data list.
      */
     operator fun plus(other: D): Col<D> = Col(name, data + other)
+
+    companion object {
+        /**
+         * The name of the time column.
+         */
+        const val TIME_NAME = "time"
+    }
 }

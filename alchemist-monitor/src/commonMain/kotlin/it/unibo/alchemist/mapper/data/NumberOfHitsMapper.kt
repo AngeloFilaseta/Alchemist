@@ -20,7 +20,7 @@ class NumberOfHitsMapper : DataMapper<Subscription.Data, Double?> {
     override fun invoke(data: Subscription.Data?): Double? {
         return when (data) {
             is NodesSubscription.Data -> {
-                return data.environment.nodes.flatMap { node ->
+                return data.simulation.environment.nodes.flatMap { node ->
                     node.contents.entries.filter {
                         it.molecule.name.contains("hit")
                     }.map { entry ->
