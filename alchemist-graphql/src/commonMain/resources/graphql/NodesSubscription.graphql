@@ -1,4 +1,5 @@
 subscription NodesSubscription {
+    simulationTime
     environment {
         nodes {
             contents {
