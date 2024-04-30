@@ -9,12 +9,18 @@
 
 package it.unibo.alchemist.mapper.data
 
+import com.apollographql.apollo3.api.Subscription
+import it.unibo.alchemist.boundary.graphql.client.ConcentrationSubscription
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 
 /**
  * Map the reception of data to the current time.
  */
-class TimeMapper : DataMapper<NodesSubscription.Data, Double?> {
+class TimeMapper : DataMapper<Subscription.Data, Double?> {
     override val outputName: String = "time"
-    override fun invoke(data: NodesSubscription.Data?): Double? = data?.simulation?.time?.doubleTime
+    override fun invoke(data: Subscription.Data?): Double? = when (data) {
+        is NodesSubscription.Data -> data.simulation.time
+        is ConcentrationSubscription.Data -> data.simulation.time
+        else -> null
+    }
 }
