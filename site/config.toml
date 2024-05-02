@@ -11,7 +11,7 @@ relativeURLs = true
 [params]
   editURL = "https://github.com/AlchemistSimulator/Alchemist/edit/master/site/content/"
   description = "The Alchemist Simulator"
-  author = "Danilo Pianini"
+  author.name = "Danilo Pianini"
   showVisitedLinks = true
   disableBreadcrumb = false
   disableNextPrev = false
@@ -24,7 +24,7 @@ relativeURLs = true
   version = "!development preview!"
 
 [outputs]
-  home = ["HTML", "RSS", "JSON"] # add JSON to the home page to support lunr search
+  home = ['html', 'rss', 'search']
 
 [markup]
   [markup.highlight]
@@ -34,13 +34,16 @@ relativeURLs = true
 [markup.goldmark.renderer]
   unsafe= true
 
+[languages.en.params]
+  landingPageURL = "/"
+  landingPageName = "<i class='fas fa-home'></i> Home"
+
 [Languages]
   [Languages.en]
     title = "Documentation for the Alchemist Simulator"
     weight = 1
     languageName = "English"
-    landingPageURL = "/"
-    landingPageName = "<i class='fas fa-home'></i> Home"
+
 
   [[Languages.en.menu.shortcuts]]
     name = "<i class='fab fa-fw fa-github'></i> GitHub repo"

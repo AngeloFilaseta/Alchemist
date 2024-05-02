@@ -7,14 +7,14 @@ defaults:
   run:
     shell: bash
 
-jobs:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: ${{ !contains(github.ref, 'master') }}
 
+jobs:
   # Prepare the environment for the build
   ci-preparation:
     runs-on: ubuntu-22.04
-    concurrency:
-      group: ci-preparation-${{ github.workflow }}-${{ github.event.number || github.ref }}
-      cancel-in-progress: true
     outputs:
       makepkg-image: ${{ steps.makepkg-image.outputs.image-name }}
       build-ref: ${{ steps.ci-preparation.outputs.build-ref }}
@@ -36,7 +36,7 @@ jobs:
             )
           }}" >> $GITHUB_OUTPUT
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Compute the Java version
         id: java-version
         run: ruby -e 'puts("java-version=#{/^minJavaVersion\s*=\s*(\d+)$/.match(File.read("gradle.properties"))[1]}")' >> $GITHUB_OUTPUT
@@ -66,16 +66,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2022, macos-12, ubuntu-22.04 ]
+        os: [ windows-2022, macos-14, ubuntu-22.04 ]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 180
-    concurrency:
-      group: build-${{ matrix.os }}-${{ needs.ci-preparation.outputs.build-ref }}
-      cancel-in-progress: true
     steps:
       - name: Checkout
-        uses: danysk/action-checkout@0.2.14
-      - uses: DanySK/build-check-deploy-gradle-action@2.4.8
+        uses: danysk/action-checkout@0.2.16
+      - uses: DanySK/build-check-deploy-gradle-action@2.4.17
         with:
           pre-build-command: true
           build-command: |
@@ -95,13 +92,10 @@ jobs:
       - ci-preparation
     runs-on: ubuntu-22.04
     timeout-minutes: 30
-    concurrency:
-      group: build-website-${{ needs.ci-preparation.outputs.build-ref }}
-      cancel-in-progress: true
     steps:
       - name: Checkout
-        uses: danysk/action-checkout@0.2.14
-      - uses: DanySK/build-check-deploy-gradle-action@2.4.8
+        uses: danysk/action-checkout@0.2.16
+      - uses: DanySK/build-check-deploy-gradle-action@2.4.17
         with:
           retries-on-failure: 5
           wait-between-retries: 120
@@ -115,7 +109,7 @@ jobs:
       - name: Tar files
         run: tar -cvf website.tar build/website
       - name: Upload website
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: website-${{ github.sha }}
           path: website.tar
@@ -149,16 +143,13 @@ jobs:
     runs-on: ubuntu-22.04
     needs:
       - ci-preparation
-    concurrency:
-      group: staging-repo-${{ needs.ci-preparation.outputs.build-ref }}
-      cancel-in-progress: true
     if: fromJSON(needs.ci-preparation.outputs.may-deploy)
     outputs:
       repo-id: ${{ steps.staging-repo.outputs.MavenCentral }}
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v4.1.1
-      - uses: DanySK/build-check-deploy-gradle-action@2.4.8
+        uses: actions/checkout@v4.1.4
+      - uses: DanySK/build-check-deploy-gradle-action@2.4.17
         with:
           maven-central-password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           should-run-codecov: false
@@ -187,7 +178,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2022, macos-12, ubuntu-22.04 ]
+        os: [ windows-2022, macos-14, ubuntu-22.04 ]
     runs-on: ${{ matrix.os }}
     # Run if:
     # - The staging repository is ready
@@ -199,13 +190,10 @@ jobs:
         )
       )
     timeout-minutes: 120
-    concurrency:
-      group: assemble-and-upload-${{ matrix.os }}-${{ needs.ci-preparation.outputs.build-ref }}
-      cancel-in-progress: true
     steps:
       - name: Checkout with full history
-        uses: danysk/action-checkout@0.2.14
-      - uses: DanySK/build-check-deploy-gradle-action@2.4.8
+        uses: danysk/action-checkout@0.2.16
+      - uses: DanySK/build-check-deploy-gradle-action@2.4.17
         with:
           signing-key: ${{ secrets.SIGNING_KEY }}
           signing-password: ${{ secrets.SIGNING_PASSWORD }}
@@ -240,20 +228,20 @@ jobs:
             fi
       - name: Upload fatjars built on Linux
         if: ${{ runner.os == 'Linux' }}
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: fat-jars-${{ github.sha }}
           path: build/shadow/*
           if-no-files-found: error
       - name: Upload the PKGBUILD
         if: ${{ runner.os == 'Linux' }}
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: pkgbuild-${{ github.sha }}
           path: build/pkgbuild/PKGBUILD
           if-no-files-found: error
       - name: Upload platform-specific packages
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: installer-package-${{ github.sha }}-${{ runner.os }}
           path: build/package/*
@@ -266,12 +254,9 @@ jobs:
     runs-on: windows-2022
     if: >-
       always() && needs.assemble-and-upload.result == 'success'
-    concurrency:
-      group: test-windows-msi-installer-${{ needs.ci-preparation.outputs.build-ref }}
-      cancel-in-progress: true
     steps:
       - name: Download packages
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: installer-package-${{ github.sha }}-${{ runner.os }}
       - name: Install packages
@@ -300,12 +285,9 @@ jobs:
     runs-on: ubuntu-22.04
     if: >-
       always() && needs.assemble-and-upload.result == 'success'
-    concurrency:
-      group: test-linux-deb-installer-${{ needs.ci-preparation.outputs.build-ref }}
-      cancel-in-progress: true
     steps:
       - name: Download packages
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: installer-package-${{ github.sha }}-${{ runner.os }}
       - name: Work around xdg bug https://bugs.archlinux.org/task/33316
@@ -331,12 +313,9 @@ jobs:
       always() && needs.assemble-and-upload.result == 'success'
     container:
       image: fedora:41
-    concurrency:
-      group: test-linux-rpm-installer-${{ needs.ci-preparation.outputs.build-ref }}
-      cancel-in-progress: true
     steps:
       - name: Download packages
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: installer-package-${{ github.sha }}-${{ runner.os }}
       - name: Install packages
@@ -359,9 +338,6 @@ jobs:
     container:
       image: ${{ needs.ci-preparation.outputs.makepkg-image }}
       options: --user root
-    concurrency:
-      group: test-aur-release-${{ needs.ci-preparation.outputs.build-ref }}
-      cancel-in-progress: true
     steps:
       - name: Setup arch
         run: |
@@ -372,7 +348,7 @@ jobs:
           # Work around https://github.com/actions/checkout/issues/1169
           # sudo git config --system --add safe.directory /__w/Alchemist/Alchemist
       - name: Download the PKGBUILD
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           pattern: pkgbuild-${{ github.sha }}
           merge-multiple: true
@@ -381,7 +357,7 @@ jobs:
           namcap PKGBUILD 2>&1
           namcap PKGBUILD 2>&1 | awk 'END { exit (NR > 0 ? NR : 0) }'
       - name: Download the RPM
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           pattern: installer-package-${{ github.sha }}-${{ runner.os }}
           merge-multiple: true
@@ -446,7 +422,7 @@ jobs:
       cancel-in-progress: false
     runs-on: ubuntu-22.04
     outputs:
-      winget-deploy: ${{ steps.deploy.outputs.winget-deploy }}
+      winget-deploy: ${{ steps.check-released.outputs.has-released }}
     if: >-
       !github.event.repository.fork
       && (
@@ -455,13 +431,13 @@ jobs:
       )
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.4
         with:
           submodules: recursive
           token: ${{ secrets.DEPLOYMENT_TOKEN }}
       - name: Checkout the docs
         if: contains(github.repository, 'AlchemistSimulator/Alchemist')
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
         with:
           path: website
           fetch-depth: 0
@@ -469,23 +445,23 @@ jobs:
           repository: AlchemistSimulator/alchemistsimulator.github.io
           token: ${{ secrets.DEPLOYMENT_TOKEN }}
       - name: Download website artifact
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: website-${{ github.sha }}
       - name: Download packages
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           pattern: installer-package-${{ github.sha }}*
           path: build/package/
           merge-multiple: true
       - name: Download fatJars
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: fat-jars-${{ github.sha }}
           path: build/shadow/
           merge-multiple: true
       - name: Download the PKGBUILD
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           pattern: pkgbuild-${{ github.sha }}
           path: pkgbuild/
@@ -494,8 +470,7 @@ jobs:
         uses: actions/setup-node@v4.0.2
         with:
           node-version-file: package.json
-      - uses: DanySK/build-check-deploy-gradle-action@2.4.8
-        id: deploy
+      - uses: DanySK/build-check-deploy-gradle-action@2.4.17
         env:
           STAGING_REPO_ID: ${{ needs.staging-repo.outputs.repo-id }}
           MAKEPKG_IMAGE: ${{ needs.ci-preparation.outputs.makepkg-image }}
@@ -527,6 +502,18 @@ jobs:
           custom-secret-0: ${{ secrets.AUR_USERNAME }}
           custom-secret-1: ${{ secrets.AUR_EMAIL }}
           custom-secret-2: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+      - name: Check if a release was performed
+        id: check-released
+        # if a file named "RELEASED" is present in the repository, write "true" to the "has-released" output
+        # Otherwise, write "false" to the same variable
+        run: |
+            if [ -f RELEASED ]; then
+                echo A relase was successfully performed
+                echo "has-released=true" >> "$GITHUB_OUTPUT"
+            else
+                echo No release was performed
+                echo "has-released=false" >> "$GITHUB_OUTPUT"
+            fi
 
   # Completes the release process for winget
   release-winget:
@@ -556,7 +543,7 @@ jobs:
           $version = "${{ needs.ci-preparation.outputs.next-version }}"
           $packageVersion = if ($version.IndexOf("-") -ne -1) { $version.Substring(0, $version.IndexOf("-")) } else { $version }
           $installerUrl = "https://github.com/AlchemistSimulator/Alchemist/releases/download/$packageVersion/alchemist-$packageVersion.msi"
-          $gitToken = ${{ github.token }}
+          $gitToken = "${{ secrets.DEPLOYMENT_TOKEN }}"
           .\wingetcreate.exe update $env:packageID --version $packageVersion --urls "$installerUrl" --submit --token $gitToken
 
   success:

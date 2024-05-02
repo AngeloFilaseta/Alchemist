@@ -59,7 +59,6 @@ kotlin {
  * If unspecified, the classpath is not correctly built when including common code from MP dependencies,
  * resulting in runtime errors.
  */
-
 private fun mpClasspath(): Provider<FileCollection> = tasks.named("compileKotlinJvm")
     .map { it.outputs.files }
     .flatMap { compileKtOutputs ->

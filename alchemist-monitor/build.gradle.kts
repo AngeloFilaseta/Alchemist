@@ -46,6 +46,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
+                implementation(rootProject)
                 implementation(alchemist("graphql-surrogates"))
                 implementation(libs.bundles.ktor.server)
                 implementation(libs.logback)

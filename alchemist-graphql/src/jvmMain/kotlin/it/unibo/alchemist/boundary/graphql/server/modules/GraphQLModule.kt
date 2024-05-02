@@ -12,7 +12,6 @@ package it.unibo.alchemist.boundary.graphql.server.modules
 import com.expediagroup.graphql.generator.hooks.FlowSubscriptionSchemaGeneratorHooks
 import com.expediagroup.graphql.server.ktor.DefaultKtorGraphQLContextFactory
 import com.expediagroup.graphql.server.ktor.GraphQL
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.serialization.jackson.JacksonWebsocketContentConverter
 import io.ktor.server.application.Application
@@ -33,16 +32,13 @@ import it.unibo.alchemist.model.Environment
  */
 fun Application.graphQLModule(environment: Environment<*, *>) {
     install(CORS) {
-        allowMethod(HttpMethod.Options)
-        allowMethod(HttpMethod.Put)
-        allowMethod(HttpMethod.Delete)
-        allowMethod(HttpMethod.Patch)
-        allowHeader(HttpHeaders.Authorization)
-        allowHeader(HttpHeaders.AccessControlAllowOrigin)
+        HttpMethod.DefaultMethods.forEach {
+            allowMethod(it)
+        }
+        allowOrigins { true }
         allowNonSimpleContentTypes = true
         allowCredentials = true
         allowSameOrigin = true
-        allowOrigins { true }
         allowHost("*", listOf("http", "https"))
         anyHost()
     }
