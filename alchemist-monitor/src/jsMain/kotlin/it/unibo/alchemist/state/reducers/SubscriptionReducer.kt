@@ -21,9 +21,9 @@ import it.unibo.alchemist.state.store
  */
 fun subscriptionReducer(
     action: SubscriptionAction,
-): Subscription<*> {
+): Subscription<Subscription.Data> {
     return when (action) {
-        is SetSubscription<*> -> {
+        is SetSubscription -> {
             store.dispatch(DataFrameClear)
             action.subscription
         }

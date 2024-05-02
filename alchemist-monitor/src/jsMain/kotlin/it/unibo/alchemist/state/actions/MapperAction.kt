@@ -10,15 +10,18 @@
 package it.unibo.alchemist.state.actions
 
 import com.apollographql.apollo3.api.Subscription
+import it.unibo.alchemist.mapper.data.DataMapper
 
-/**
- * An action to perform on a [Subscription].
- */
-sealed interface SubscriptionAction
+sealed interface MapperAction
 
-/**
- * Set the current subscription.
- * @param D the type of the data.
- * @param subscription the subscription to set.
- */
-data class SetSubscription(val subscription: Subscription<Subscription.Data>) : SubscriptionAction
+data class AddMapper(
+    val mappers: List<DataMapper<Subscription.Data, Double>>,
+) : MapperAction {
+    companion object {
+        operator fun invoke(vararg mappers: DataMapper<Subscription.Data, Double>): AddMapper {
+            return AddMapper(mappers.toList())
+        }
+    }
+}
+
+data object ClearMappers : MapperAction

@@ -16,11 +16,11 @@ import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 /**
  * Map the reception of data to the current time.
  */
-class TimeMapper : DataMapper<Subscription.Data, Double?> {
+class TimeMapper : DataMapper<Subscription.Data, Double> {
     override val outputName: String = "time"
-    override fun invoke(data: Subscription.Data?): Double? = when (data) {
+    override fun invoke(data: Subscription.Data?): Double = when (data) {
         is NodesSubscription.Data -> data.simulation.time
         is ConcentrationSubscription.Data -> data.simulation.time
-        else -> null
+        else -> 0.0
     }
 }

@@ -6,7 +6,6 @@
  * GNU General Public License, with a linking exception,
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
-
 package it.unibo.alchemist
 
 import com.apollographql.apollo3.api.Subscription
@@ -17,8 +16,6 @@ import it.unibo.alchemist.component.Form
 import it.unibo.alchemist.component.Info
 import it.unibo.alchemist.component.Navbar
 import it.unibo.alchemist.dataframe.DataFrame
-import it.unibo.alchemist.mapper.data.NumberOfHitsMapper
-import it.unibo.alchemist.mapper.data.TimeMapper
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import it.unibo.alchemist.state.actions.Collect
 import it.unibo.alchemist.state.store
@@ -52,36 +49,18 @@ private val App = FC<Props> {
 
     var subscriptionController by useState(GraphQLSubscriptionController.fromClients(emptyList()))
     var dataframes by useState(emptyMap<GraphQLClient, DataFrame>())
-    var subscription by useState<Subscription<*>?>(null)
+    var subscription by useState<Subscription<Subscription.Data>?>(null)
 
     store.subscribe {
         subscriptionController = store.state.subscriptionController
-        // TODO subscription = store.state.currentSubscription
-        subscription = ConcentrationSubscription("localSuccess")
+        subscription = store.state.currentSubscription
         dataframes = store.state.dataframes
     }
 
     useEffect(subscriptionController, subscription) {
         subscription?.let {
             sub {
-                val mappers = listOf(TimeMapper(), NumberOfHitsMapper())
-                store.state.subscriptionController.subscribe(it).mapValues { (client, flow) ->
-                    MainScope().launch {
-                        flow.collect { response ->
-                            store.dispatch(
-                                Collect(
-                                    client,
-                                    when (response.data) {
-                                        is NodesSubscription.Data -> mappers.map { m ->
-                                            m.outputName to m.invoke(response.data as NodesSubscription.Data)
-                                        }
-                                        else -> listOf()
-                                    },
-                                ),
-                            )
-                        }
-                    }
-                }
+                subscribeAll(it)
             }
         }
     }
@@ -106,7 +85,7 @@ private fun addPlotDiv(map: Map<GraphQLClient, DataFrame>) {
     contentDiv?.innerHTML = ""
     map.forEach { (client, df) ->
         console.log(df)
-        val plotDiv = JsFrontendUtil.createPlotDiv(generatePlot(df))
+        val plotDiv = JsFrontendUtil.createPlotDiv(generatePlot(df, "localSuccess"))
         contentDiv?.appendChild(plotDiv)
         contentDiv?.appendChild(
             document.createElement("p").apply {
@@ -116,10 +95,33 @@ private fun addPlotDiv(map: Map<GraphQLClient, DataFrame>) {
     }
 }
 
-private fun generatePlot(df: DataFrame): Plot {
+private fun generatePlot(df: DataFrame, yName: String): Plot {
     return df.toPlot() + geomLine(color = "red") {
         x = "time"
-        y = "hits"
+        y = yName
+    }
+}
+
+private suspend fun subscribeAll(subscription: Subscription<Subscription.Data>) {
+    store.state.subscriptionController.subscribe(subscription).mapValues { (client, flow) ->
+        MainScope().launch {
+            flow.collect { response ->
+                store.dispatch(
+                    Collect(
+                        client,
+                        when (response.data) {
+                            is NodesSubscription.Data -> store.state.mappers.map { m ->
+                                m.outputName to m.invoke(response.data as NodesSubscription.Data)
+                            }
+                            is ConcentrationSubscription.Data -> store.state.mappers.map { m ->
+                                m.outputName to m.invoke(response.data as ConcentrationSubscription.Data)
+                            }
+                            else -> listOf()
+                        },
+                    ),
+                )
+            }
+        }
     }
 }
 

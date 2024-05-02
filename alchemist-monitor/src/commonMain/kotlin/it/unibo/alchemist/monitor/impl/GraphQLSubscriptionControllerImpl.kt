@@ -22,10 +22,10 @@ internal data class GraphQLSubscriptionControllerImpl(
     override val clients: List<GraphQLClient>,
 ) : GraphQLSubscriptionController {
 
-    override fun <D : Subscription.Data> subscribe(
-        subscription: Subscription<D>,
-        filter: (D) -> Boolean,
-    ): Map<GraphQLClient, Flow<ApolloResponse<D>>> =
+    override fun subscribe(
+        subscription: Subscription<Subscription.Data>,
+        filter: (Subscription.Data) -> Boolean,
+    ): Map<GraphQLClient, Flow<ApolloResponse<Subscription.Data>>> =
         clients.associateWith { it.subscription(subscription).toFlow() }
 
     override fun close(filter: (GraphQLClient) -> Boolean) {

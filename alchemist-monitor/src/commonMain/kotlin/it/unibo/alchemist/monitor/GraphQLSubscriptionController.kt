@@ -16,8 +16,6 @@ import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.boundary.graphql.client.PauseSimulationMutation
 import it.unibo.alchemist.boundary.graphql.client.PlaySimulationMutation
-import it.unibo.alchemist.mapper.data.DataMapper
-import it.unibo.alchemist.mapper.response.SubscriptionMapper
 import it.unibo.alchemist.monitor.impl.GraphQLSubscriptionControllerImpl
 import kotlinx.coroutines.flow.Flow
 
@@ -63,28 +61,10 @@ interface GraphQLSubscriptionController {
      * @param filter a filter to be applied to the data
      * @return a map of clients and the associated flow of requested data
      */
-    fun <D : Subscription.Data> subscribe(
-        subscription: Subscription<D>,
-        filter: (D) -> Boolean = { true },
-    ): Map<GraphQLClient, Flow<ApolloResponse<D>>>
-
-    /**
-     * Subscribe to a given subscription on all clients and collect the data into mutable lists.
-     * @param subscription the subscription to be executed.
-     * @param filter a filter to be applied to the data.
-     */
-    suspend fun <D : Subscription.Data> subscribeAndCollect(
-        subscription: Subscription<D>,
-        mappers: List<DataMapper<D, Any?>>,
-        namedFlowCollector: suspend (GraphQLClient, String, Flow<Any?>) -> Unit,
-        filter: (D) -> Boolean = { true },
-    ) {
-        subscribe(subscription, filter).mapValues { entry ->
-            SubscriptionMapper(entry.value).mapUsing(mappers).forEach {
-                namedFlowCollector(entry.key, it.key, it.value)
-            }
-        }
-    }
+    fun subscribe(
+        subscription: Subscription<Subscription.Data>,
+        filter: (Subscription.Data) -> Boolean = { true },
+    ): Map<GraphQLClient, Flow<ApolloResponse<Subscription.Data>>>
 
     /**
      * Close all clients that satisfy the given filter.

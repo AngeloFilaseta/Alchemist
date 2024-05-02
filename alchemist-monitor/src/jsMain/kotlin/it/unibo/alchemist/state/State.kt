@@ -12,6 +12,7 @@ package it.unibo.alchemist.state
 import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.dataframe.DataFrame
+import it.unibo.alchemist.mapper.data.DataMapper
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import it.unibo.alchemist.state.actions.DataFramesAction
 import it.unibo.alchemist.state.actions.SubscriptionAction
@@ -28,7 +29,8 @@ import it.unibo.alchemist.state.reducers.subscriptionReducer
 data class State(
     val subscriptionController: GraphQLSubscriptionController =
         GraphQLSubscriptionController.fromClients(emptyList()),
-    val currentSubscription: Subscription<*>? = null,
+    val currentSubscription: Subscription<Subscription.Data>? = null,
+    val mappers: List<DataMapper<Subscription.Data, Double>> = listOf(),
     val dataframes: Map<GraphQLClient, DataFrame> = emptyMap(),
 )
 

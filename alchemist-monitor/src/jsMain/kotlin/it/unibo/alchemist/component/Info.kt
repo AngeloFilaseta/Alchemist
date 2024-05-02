@@ -42,7 +42,7 @@ val Info = FC("Info") { props: InfoProps ->
             +"Current Subscription"
         }
         p {
-            +(subscription?.name() ?: "-")
+            +(subscription.toString())
         }
         h4 {
             +"Connected Clients"

@@ -79,6 +79,11 @@ kotlin {
     }
 }
 
+tasks.build {
+    dependsOn(webpackTask)
+    dependsOn(copyWebpackOutput)
+}
+
 /**
  * Webpack task that generates the JS artifacts.
  */
@@ -89,6 +94,8 @@ webpackTask.configure {
 }
 
 val copyWebpackOutput by tasks.registering(Copy::class) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn(tasks.named("jvmProcessResources"))
     dependsOn(webpackTask)
     from(
         webpackTask.map { out ->

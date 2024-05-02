@@ -12,20 +12,21 @@ package it.unibo.alchemist.mapper.data
 import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.ConcentrationSubscription
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
+import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
 
 /**
  * Map the concentration of a molecule to a list of values.
  * @param moleculeName the name of the molecule.
  * @param transform the transformation to apply to the concentration.
  */
-sealed class ConcentrationMapper<T>(
+sealed class ConcentrationMapper(
     private val moleculeName: String,
-    private val transform: (String?) -> T?,
-) : DataMapper<Subscription.Data, List<T?>> {
+    private val transform: (String?) -> Double?,
+) : DataMapper<Subscription.Data, List<Double?>> {
     override val outputName: String
         get() = moleculeName
 
-    override fun invoke(data: Subscription.Data?): List<T?> {
+    override fun invoke(data: Subscription.Data?): List<Double?> {
         return when (data) {
             is NodesSubscription.Data -> {
                 return data.simulation.environment.nodes.map { node ->
@@ -47,7 +48,18 @@ sealed class ConcentrationMapper<T>(
 /**
  * Map the concentration of a molecule named "localSuccess" to a list of doubles.
  */
-data object LocalSuccessConcentrationMapper : ConcentrationMapper<Double>(
+data object LocalSuccessConcentrationMapper : ConcentrationMapper(
     moleculeName = "localSuccess",
     transform = { it?.toDoubleOrNull() },
 )
+
+data class AggregateConcentration(
+    val concentrationMapper: ConcentrationMapper,
+    val aggregationStrategy: AggregationStrategy,
+) : DataMapper<Subscription.Data, Double> {
+    override val outputName: String
+        get() = concentrationMapper.outputName
+
+    override fun invoke(data: Subscription.Data?): Double =
+        aggregationStrategy.aggregate(concentrationMapper.invoke(data).filterNotNull())
+}
