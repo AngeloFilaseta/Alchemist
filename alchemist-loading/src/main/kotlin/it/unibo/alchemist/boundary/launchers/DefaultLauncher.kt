@@ -31,10 +31,10 @@ import java.util.concurrent.atomic.AtomicInteger
  * defaults to the number of logical cores detected by the JVM.
  */
 open class DefaultLauncher @JvmOverloads constructor(
-    val batch: List<String> = emptyList(),
-    val autoStart: Boolean = true,
-    val showProgress: Boolean = true,
-    val parallelism: Int = Runtime.getRuntime().availableProcessors(),
+    open val batch: List<String> = emptyList(),
+    open val autoStart: Boolean = true,
+    open val showProgress: Boolean = true,
+    open val parallelism: Int = Runtime.getRuntime().availableProcessors(),
 ) : Launcher {
 
     @JvmOverloads constructor(

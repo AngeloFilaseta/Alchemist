@@ -10,7 +10,6 @@
 import Libs.alchemist
 
 plugins {
-    application
     alias(libs.plugins.kotest.multiplatform)
 }
 
@@ -80,25 +79,24 @@ kotlin {
     }
 }
 
-application {
-    mainClass.set("it.unibo.alchemist.server.MonitorServiceKt")
-}
-
 /**
  * Webpack task that generates the JS artifacts.
  */
 val webpackTask = tasks.named("jsBrowserDevelopmentWebpack")
 
-tasks.named("run", JavaExec::class).configure {
-    classpath(
-        tasks.named("compileKotlinJvm"),
-        configurations.named("jvmRuntimeClasspath"),
-        webpackTask.map { task ->
-            task.outputs.files.map { file ->
-                file
-            }
+webpackTask.configure {
+    finalizedBy(copyWebpackOutput)
+}
+
+val copyWebpackOutput by tasks.registering(Copy::class) {
+    dependsOn(webpackTask)
+    from(
+        webpackTask.map { out ->
+            out.outputs.files
         },
     )
+    into("src/commonMain/resources")
+    shouldRunAfter(webpackTask)
 }
 
 publishing.publications {
