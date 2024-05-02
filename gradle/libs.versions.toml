@@ -2,6 +2,7 @@
 antlr4 = "4.13.1"
 apollo ="3.8.3"
 arrow = "1.2.3"
+collektive = "9.2.1"
 dokka = "1.9.20"
 graphhopper = "9.0-pre1"
 graphql = "7.0.2"
@@ -34,6 +35,9 @@ arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 boilerplate = "org.danilopianini:boilerplate:0.2.2"
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.1.8"
 classgraph = "io.github.classgraph:classgraph:4.8.168"
+collektive = { module = "it.unibo.collektive:dsl", version.ref = "collektive" }
+collektive-incarnation = { module = "it.unibo.collektive:alchemist-incarnation-collektive", version.ref = "collektive" }
+collektive-plugin = { module = "it.unibo.collektive:compiler-plugin", version.ref = "collektive" }
 conrec = "org.danilopianini:conrec:0.1.0"
 controlsfx = "org.controlsfx:controlsfx:11.2.1"
 dyn4j = "org.dyn4j:dyn4j:5.0.2"
@@ -124,6 +128,7 @@ tornadofx = "no.tornado:tornadofx:2.0.0-SNAPSHOT"
 trove4j = "net.sf.trove4j:trove4j:3.0.3"
 
 [bundles]
+collektive = ["collektive", "collektive-incarnation", "collektive-plugin"]
 graphhopper = [ "graphhopper-core" ]
 graphql-server = [ "graphql-server", "graphql-server-ktor" ]
 jiconfont = [ "jiconfont-javafx", "jiconfont-materialDesignIcons" ]
@@ -153,6 +158,7 @@ testing-compile = [
 testing-runtimeOnly = [ "junit-engine" ]
 
 [plugins]
+collektive = { id = "it.unibo.collektive.collektive-plugin", version.ref = "collektive" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 gitSemVer = "org.danilopianini.git-sensitive-semantic-versioning-gradle-plugin:3.1.4"
 graphql-client = { id = "com.apollographql.apollo3", version.ref = "apollo" }

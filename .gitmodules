@@ -6,3 +6,7 @@
 	path = external-resources/learning-scafi-alchemist
 	url = https://github.com/scafi/learning-scafi-alchemist.git
 	shallow = true
+[submodule "vmc-experiments"]
+	path = vmc-experiments
+	url = git@github.com:angelacorte/vmc-experiments.git
+	branch = feat/vascular-morphogenesis

@@ -48,7 +48,7 @@ kotlin {
             dependencies {
                 api(alchemist("api"))
                 implementation(incarnation("sapere"))
-                implementation(rootProject)
+
                 implementation(libs.bundles.ktor.server)
                 implementation(libs.logback)
                 implementation(libs.resourceloader)
