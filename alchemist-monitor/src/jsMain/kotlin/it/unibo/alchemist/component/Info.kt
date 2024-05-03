@@ -10,12 +10,15 @@
 package it.unibo.alchemist.component
 
 import com.apollographql.apollo3.api.Subscription
+import it.unibo.alchemist.boundary.graphql.client.ConcentrationSubscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
+import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.h4
+import react.dom.html.ReactHTML.h5
 import react.dom.html.ReactHTML.p
 import react.dom.html.ReactHTML.table
 import react.dom.html.ReactHTML.tbody
@@ -27,6 +30,7 @@ import web.cssom.ClassName
 external interface InfoProps : Props {
     var clients: List<GraphQLClient>
     var currentSubscription: Subscription<*>?
+    var averageTime: Int
 }
 
 val Info = FC("Info") { props: InfoProps ->
@@ -42,7 +46,11 @@ val Info = FC("Info") { props: InfoProps ->
             +"Current Subscription"
         }
         p {
-            +(subscription.toString())
+            +when (subscription) {
+                is ConcentrationSubscription -> "Retrieving only `${subscription.moleculeName}`"
+                is NodesSubscription -> "Retrieving all nodes"
+                else -> "-"
+            }
         }
         h4 {
             +"Connected Clients"
@@ -68,6 +76,12 @@ val Info = FC("Info") { props: InfoProps ->
                     }
                 }
             }
+        }
+        h5 {
+            +"Average time of response"
+        }
+        p {
+            +"${props.averageTime}ms"
         }
     }
 }

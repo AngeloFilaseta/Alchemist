@@ -13,10 +13,13 @@ import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.component.Form
 import it.unibo.alchemist.component.Info
 import it.unibo.alchemist.component.Navbar
+import it.unibo.alchemist.dataframe.Col
 import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.mapper.data.DataMapper
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
+import it.unibo.alchemist.state.actions.AddTime
 import it.unibo.alchemist.state.actions.Collect
+import it.unibo.alchemist.state.actions.ResetEvaluation
 import it.unibo.alchemist.state.store
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
@@ -47,7 +50,8 @@ fun main() {
 
 private val App = FC<Props> {
 
-    var timeList by useState(emptyList<Long>())
+    var evaluationDf by useState(DataFrame.empty())
+    var avgTime by useState(0)
     var subscriptionController by useState(GraphQLSubscriptionController.fromClients(emptyList()))
     var dataframes by useState(emptyMap<GraphQLClient, DataFrame>())
     var mappers by useState<List<DataMapper<Double>>>(listOf())
@@ -58,29 +62,30 @@ private val App = FC<Props> {
         subscription = store.state.currentSubscription
         mappers = store.state.mappers
         dataframes = store.state.dataframes
+        evaluationDf = store.state.evaluationDf
     }
 
-    useEffect(timeList) {
-        console.log(timeList.map { it - timeList.min() }.average())
+    @Suppress("UNCHECKED_CAST")
+    useEffect(evaluationDf) {
+        val timeCol = evaluationDf.cols.firstOrNull { it.name == Col.TIME_NAME }
+        timeCol?.let {
+            val d = timeCol.data as List<Long>
+            avgTime = d.map { it - d.min() }.zipWithNext { a, b -> b - a }.average().toInt()
+        }
     }
 
     useEffect(subscription) {
-        timeList = emptyList()
+        store.dispatch(ResetEvaluation)
     }
 
     suspend fun subscribeAll(subscription: Subscription<Subscription.Data>) {
         subscriptionController.subscribe(subscription).mapValues { (client, flow) ->
             MainScope().launch {
                 flow.collect { response ->
-                    console.log(Clock.System.now().toEpochMilliseconds())
-                    store.dispatch(
-                        Collect(
-                            client,
-                            mappers.map { m ->
-                                m.outputName to m.invoke(response.data)
-                            },
-                        ),
-                    )
+                    listOf(
+                        Collect(client, mappers.map { m -> m.outputName to m.invoke(response.data) }),
+                        AddTime(Clock.System.now().toEpochMilliseconds()),
+                    ).forEach { store.dispatch(it) }
                 }
             }
         }
@@ -128,6 +133,7 @@ private val App = FC<Props> {
         Info {
             clients = subscriptionController.clients
             currentSubscription = subscription
+            averageTime = avgTime
         }
     }
 }

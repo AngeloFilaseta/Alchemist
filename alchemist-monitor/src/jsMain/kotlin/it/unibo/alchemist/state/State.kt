@@ -15,11 +15,13 @@ import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.mapper.data.DataMapper
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import it.unibo.alchemist.state.actions.DataFramesAction
+import it.unibo.alchemist.state.actions.EvaluationAction
 import it.unibo.alchemist.state.actions.MapperAction
 import it.unibo.alchemist.state.actions.SubscriptionAction
 import it.unibo.alchemist.state.actions.SubscriptionControllerAction
 import it.unibo.alchemist.state.reducers.dataFramesReducer
 import it.unibo.alchemist.state.reducers.dataMapperReducer
+import it.unibo.alchemist.state.reducers.evaluationReducer
 import it.unibo.alchemist.state.reducers.subscriptionManagerReducer
 import it.unibo.alchemist.state.reducers.subscriptionReducer
 
@@ -34,6 +36,7 @@ data class State(
     val currentSubscription: Subscription<Subscription.Data>? = null,
     val mappers: List<DataMapper<Double>> = listOf(),
     val dataframes: Map<GraphQLClient, DataFrame> = emptyMap(),
+    val evaluationDf: DataFrame = DataFrame.empty(),
 )
 
 /**
@@ -53,6 +56,9 @@ fun rootReducer(state: State, action: Any): State = when (action) {
     )
     is DataFramesAction -> state.copy(
         dataframes = dataFramesReducer(state.dataframes, action),
+    )
+    is EvaluationAction -> state.copy(
+        evaluationDf = evaluationReducer(state.evaluationDf, action),
     )
     else -> state
 }

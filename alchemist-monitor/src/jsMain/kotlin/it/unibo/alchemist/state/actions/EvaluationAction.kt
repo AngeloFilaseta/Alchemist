@@ -9,18 +9,8 @@
 
 package it.unibo.alchemist.state.actions
 
-import com.apollographql.apollo3.api.Subscription
+sealed interface EvaluationAction
 
-/**
- * An action to perform on a [Subscription].
- */
-sealed interface SubscriptionAction
+data class AddTime(val time: Long) : EvaluationAction
 
-/**
- * Set the current subscription.
- * @param S the type of the data.
- * @param subscription the subscription to set.
- */
-data class SetSubscription<S : Subscription<*>>(
-    val subscription: @UnsafeVariance S,
-) : SubscriptionAction
+data object ResetEvaluation : EvaluationAction

@@ -7,11 +7,8 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-@file:Suppress("UNCHECKED_CAST")
-
 package it.unibo.alchemist.component
 
-import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.Full
 import it.unibo.alchemist.Limited
 import it.unibo.alchemist.Parameter
@@ -52,28 +49,22 @@ val Form = FC<Props>("Form") {
                 store.dispatch(ClearMappers)
                 when (chosenSubscriptionSize) {
                     Limited -> if (chosenParameter != null) {
-                        store.dispatch(
-                            SetSubscription(
-                                ConcentrationSubscription(
-                                    chosenParameter.toString(),
-                                ) as Subscription<Subscription.Data>,
-                            ),
-                        )
-                        store.dispatch(
+                        listOf(
+                            SetSubscription(ConcentrationSubscription(chosenParameter.toString())),
                             AddMapper(
                                 TimeMapper(),
                                 AggregateConcentration(LocalSuccessConcentrationMapper, AggregationStrategy.Max),
                             ),
-                        )
+                        ).forEach { store.dispatch(it) }
                     }
                     Full -> {
-                        store.dispatch(SetSubscription(NodesSubscription() as Subscription<Subscription.Data>))
-                        store.dispatch(
+                        listOf(
+                            SetSubscription(NodesSubscription()),
                             AddMapper(
                                 TimeMapper(),
                                 AggregateConcentration(LocalSuccessConcentrationMapper, AggregationStrategy.Max),
                             ),
-                        )
+                        ).forEach { store.dispatch(it) }
                     }
                     null -> {}
                 }

@@ -7,6 +7,8 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
+@file:Suppress("UNCHECKED_CAST")
+
 package it.unibo.alchemist.state.reducers
 
 import com.apollographql.apollo3.api.Subscription
@@ -23,9 +25,9 @@ fun subscriptionReducer(
     action: SubscriptionAction,
 ): Subscription<Subscription.Data> {
     return when (action) {
-        is SetSubscription -> {
+        is SetSubscription<*> -> {
             store.dispatch(DataFrameClear)
-            action.subscription
+            action.subscription as Subscription<Subscription.Data>
         }
     }
 }
