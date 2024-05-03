@@ -9,19 +9,19 @@
 package it.unibo.alchemist
 
 import com.apollographql.apollo3.api.Subscription
-import it.unibo.alchemist.boundary.graphql.client.ConcentrationSubscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
-import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import it.unibo.alchemist.component.Form
 import it.unibo.alchemist.component.Info
 import it.unibo.alchemist.component.Navbar
 import it.unibo.alchemist.dataframe.DataFrame
+import it.unibo.alchemist.mapper.data.DataMapper
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import it.unibo.alchemist.state.actions.Collect
 import it.unibo.alchemist.state.store
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.jetbrains.letsPlot.frontend.JsFrontendUtil
 import org.jetbrains.letsPlot.geom.geomLine
 import org.jetbrains.letsPlot.intern.Plot
@@ -47,15 +47,67 @@ fun main() {
 
 private val App = FC<Props> {
 
+    var timeList by useState(emptyList<Long>())
     var subscriptionController by useState(GraphQLSubscriptionController.fromClients(emptyList()))
     var dataframes by useState(emptyMap<GraphQLClient, DataFrame>())
+    var mappers by useState<List<DataMapper<Double>>>(listOf())
     var subscription by useState<Subscription<Subscription.Data>?>(null)
 
     store.subscribe {
         subscriptionController = store.state.subscriptionController
         subscription = store.state.currentSubscription
+        mappers = store.state.mappers
         dataframes = store.state.dataframes
     }
+
+    useEffect(timeList) {
+        console.log(timeList.map { it - timeList.min() }.average())
+    }
+
+    useEffect(subscription) {
+        timeList = emptyList()
+    }
+
+    suspend fun subscribeAll(subscription: Subscription<Subscription.Data>) {
+        subscriptionController.subscribe(subscription).mapValues { (client, flow) ->
+            MainScope().launch {
+                flow.collect { response ->
+                    console.log(Clock.System.now().toEpochMilliseconds())
+                    store.dispatch(
+                        Collect(
+                            client,
+                            mappers.map { m ->
+                                m.outputName to m.invoke(response.data)
+                            },
+                        ),
+                    )
+                }
+            }
+        }
+    }
+
+    fun generatePlot(df: DataFrame, yName: String): Plot {
+        return df.toPlot() + geomLine(color = "red") {
+            x = "time"
+            y = yName
+        }
+    }
+
+    fun addPlotDiv(map: Map<GraphQLClient, DataFrame>) {
+        val contentDiv = document.getElementById("plot")
+        contentDiv?.innerHTML = ""
+        map.forEach { (client, df) ->
+            val plotDiv = JsFrontendUtil.createPlotDiv(generatePlot(df, "localSuccess"))
+            contentDiv?.appendChild(plotDiv)
+            contentDiv?.appendChild(
+                document.createElement("p").apply {
+                    innerHTML = "Data from client ${client.serverUrl()}"
+                },
+            )
+        }
+    }
+
+    // COMPONENT
 
     useEffect(subscriptionController, subscription) {
         subscription?.let {
@@ -76,51 +128,6 @@ private val App = FC<Props> {
         Info {
             clients = subscriptionController.clients
             currentSubscription = subscription
-        }
-    }
-}
-
-private fun addPlotDiv(map: Map<GraphQLClient, DataFrame>) {
-    val contentDiv = document.getElementById("plot")
-    contentDiv?.innerHTML = ""
-    map.forEach { (client, df) ->
-        console.log(df)
-        val plotDiv = JsFrontendUtil.createPlotDiv(generatePlot(df, "localSuccess"))
-        contentDiv?.appendChild(plotDiv)
-        contentDiv?.appendChild(
-            document.createElement("p").apply {
-                innerHTML = "Data from client ${client.serverUrl()}"
-            },
-        )
-    }
-}
-
-private fun generatePlot(df: DataFrame, yName: String): Plot {
-    return df.toPlot() + geomLine(color = "red") {
-        x = "time"
-        y = yName
-    }
-}
-
-private suspend fun subscribeAll(subscription: Subscription<Subscription.Data>) {
-    store.state.subscriptionController.subscribe(subscription).mapValues { (client, flow) ->
-        MainScope().launch {
-            flow.collect { response ->
-                store.dispatch(
-                    Collect(
-                        client,
-                        when (response.data) {
-                            is NodesSubscription.Data -> store.state.mappers.map { m ->
-                                m.outputName to m.invoke(response.data as NodesSubscription.Data)
-                            }
-                            is ConcentrationSubscription.Data -> store.state.mappers.map { m ->
-                                m.outputName to m.invoke(response.data as ConcentrationSubscription.Data)
-                            }
-                            else -> listOf()
-                        },
-                    ),
-                )
-            }
         }
     }
 }

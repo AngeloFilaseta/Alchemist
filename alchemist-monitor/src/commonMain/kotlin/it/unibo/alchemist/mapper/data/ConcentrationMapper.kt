@@ -22,7 +22,7 @@ import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
 sealed class ConcentrationMapper(
     private val moleculeName: String,
     private val transform: (String?) -> Double?,
-) : DataMapper<Subscription.Data, List<Double?>> {
+) : DataMapper<List<Double?>> {
     override val outputName: String
         get() = moleculeName
 
@@ -56,7 +56,7 @@ data object LocalSuccessConcentrationMapper : ConcentrationMapper(
 data class AggregateConcentration(
     val concentrationMapper: ConcentrationMapper,
     val aggregationStrategy: AggregationStrategy,
-) : DataMapper<Subscription.Data, Double> {
+) : DataMapper<Double> {
     override val outputName: String
         get() = concentrationMapper.outputName
 

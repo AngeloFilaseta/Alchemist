@@ -9,16 +9,15 @@
 
 package it.unibo.alchemist.state.actions
 
-import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.mapper.data.DataMapper
 
 sealed interface MapperAction
 
 data class AddMapper(
-    val mappers: List<DataMapper<Subscription.Data, Double>>,
+    val mappers: List<DataMapper<Double>>,
 ) : MapperAction {
     companion object {
-        operator fun invoke(vararg mappers: DataMapper<Subscription.Data, Double>): AddMapper {
+        operator fun invoke(vararg mappers: DataMapper<Double>): AddMapper {
             return AddMapper(mappers.toList())
         }
     }

@@ -9,12 +9,13 @@
 
 package it.unibo.alchemist.mapper.data
 
+import com.apollographql.apollo3.api.Subscription
+
 /**
- * A data mapper, from [D] to [O].
- * @param D the input type.
+ * A data mapper, from [Subscription.Data] to [O].
  * @param O the output type.
  */
-interface DataMapper<in D, out O> {
+interface DataMapper<out O> {
     /**
      * The name of the output data.
      */
@@ -25,5 +26,5 @@ interface DataMapper<in D, out O> {
      * @param data the input data.
      * @return the output data.
      */
-    operator fun invoke(data: D?): O
+    operator fun invoke(data: Subscription.Data?): O
 }

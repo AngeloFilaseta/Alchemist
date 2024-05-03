@@ -33,6 +33,7 @@ import react.dom.html.ReactHTML
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.h4
+import react.useEffect
 import react.useState
 import web.cssom.ClassName
 
@@ -52,7 +53,11 @@ val Form = FC<Props>("Form") {
                 when (chosenSubscriptionSize) {
                     Limited -> if (chosenParameter != null) {
                         store.dispatch(
-                            SetSubscription(ConcentrationSubscription(chosenParameter.toString()) as Subscription<Subscription.Data>),
+                            SetSubscription(
+                                ConcentrationSubscription(
+                                    chosenParameter.toString(),
+                                ) as Subscription<Subscription.Data>,
+                            ),
                         )
                         store.dispatch(
                             AddMapper(
@@ -76,6 +81,10 @@ val Form = FC<Props>("Form") {
         }
     }
 
+    useEffect(chosenParameter, chosenSubscriptionSize) {
+        updateState()
+    }
+
     div {
         className = ClassName("col-lg-6")
         h2 {
@@ -92,7 +101,6 @@ val Form = FC<Props>("Form") {
                     event.target.value.let {
                         chosenParameter = Parameter.fromString(it)
                     }
-                    updateState()
                 }
                 className = ClassName("form-select")
                 ReactHTML.option {
@@ -119,7 +127,6 @@ val Form = FC<Props>("Form") {
                         event.target.value.let {
                             chosenSubscriptionSize = SubscriptionSize.fromString(it)
                         }
-                        updateState()
                     }
                     className = ClassName("form-select")
                     ReactHTML.option {

@@ -94,7 +94,7 @@ webpackTask.configure {
 }
 
 val copyWebpackOutput by tasks.registering(Copy::class) {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     dependsOn(tasks.named("jvmProcessResources"))
     dependsOn(webpackTask)
     from(
