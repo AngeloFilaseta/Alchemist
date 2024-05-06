@@ -35,11 +35,11 @@ fun Application.graphQLModule(environment: Environment<*, *>) {
         HttpMethod.DefaultMethods.forEach {
             allowMethod(it)
         }
+        allowHeaders { true }
         allowOrigins { true }
         allowNonSimpleContentTypes = true
         allowCredentials = true
         allowSameOrigin = true
-        allowHost("*", listOf("http", "https"))
         anyHost()
     }
 

@@ -9,7 +9,6 @@
 
 package it.unibo.alchemist.server.modules
 
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -20,12 +19,10 @@ import io.ktor.server.plugins.cors.routing.CORS
  */
 fun Application.installModule() {
     install(CORS) {
-        allowMethod(HttpMethod.Options)
-        allowMethod(HttpMethod.Put)
-        allowMethod(HttpMethod.Delete)
-        allowMethod(HttpMethod.Patch)
-        allowHeader(HttpHeaders.Authorization)
-        allowHeader(HttpHeaders.AccessControlAllowOrigin)
+        HttpMethod.DefaultMethods.forEach {
+            allowMethod(it)
+        }
+        allowOrigins { true }
         allowNonSimpleContentTypes = true
         allowCredentials = true
         allowSameOrigin = true
