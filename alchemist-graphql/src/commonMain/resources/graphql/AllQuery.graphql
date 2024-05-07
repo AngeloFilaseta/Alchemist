@@ -1,0 +1,35 @@
+query AllQuery {
+  simulation {
+		status
+    time
+    environment {
+      dimensions
+      nodeToPos {
+        size
+        entries {
+          id
+          position {
+            coordinates
+          }
+        }
+      }
+      nodes {
+        moleculeCount
+        properties
+        reactions {
+          node {
+            id
+          }
+        }
+        contents {
+          entries {
+            molecule {
+              name
+            }
+            concentration
+          }
+        }
+      }
+    }
+  }
+}

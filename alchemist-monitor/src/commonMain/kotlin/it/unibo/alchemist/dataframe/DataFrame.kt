@@ -20,6 +20,12 @@ interface DataFrame {
     val cols: List<Col<Any?>>
 
     /**
+     * Get a column by name.
+     * @return the column with the given name, or null if it does not exist.
+     */
+    fun col(name: String): Col<Any?>? = cols.firstOrNull { it.name == name }
+
+    /**
      * Add a new column to the data frame.
      * @return a new data frame with the new data added.
      */
