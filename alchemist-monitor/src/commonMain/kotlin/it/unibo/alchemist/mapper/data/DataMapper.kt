@@ -9,6 +9,7 @@
 
 package it.unibo.alchemist.mapper.data
 
+import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.api.Subscription
 
 /**
@@ -27,4 +28,11 @@ interface DataMapper<out O> {
      * @return the output data.
      */
     operator fun invoke(data: Subscription.Data?): O
+
+    /**
+     * Maps the input data to the output data.
+     * @param data the input data.
+     * @return the output data.
+     */
+    operator fun invoke(data: Query.Data?): O
 }

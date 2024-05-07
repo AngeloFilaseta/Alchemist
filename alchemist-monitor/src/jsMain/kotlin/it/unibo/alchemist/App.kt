@@ -8,6 +8,7 @@
  */
 package it.unibo.alchemist
 
+import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.component.Form
@@ -91,6 +92,15 @@ private val App = FC<Props> {
         }
     }
 
+    suspend fun queryAll(query: Query<Query.Data>) {
+        subscriptionController.query(query).mapValues { (client, result) ->
+            listOf(
+                Collect(client, mappers.map { m -> m.outputName to m.invoke(result.data) }),
+                AddTime(Clock.System.now().toEpochMilliseconds()),
+            ).forEach { store.dispatch(it) }
+        }
+    }
+
     fun generatePlot(df: DataFrame, yName: String): Plot {
         return df.toPlot() + geomLine(color = "red") {
             x = "time"
@@ -113,7 +123,6 @@ private val App = FC<Props> {
     }
 
     // COMPONENT
-
     useEffect(subscriptionController, subscription) {
         subscription?.let {
             sub {

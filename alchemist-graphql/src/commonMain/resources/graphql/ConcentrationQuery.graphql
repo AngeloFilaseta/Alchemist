@@ -1,0 +1,10 @@
+query ConcentrationQuery($moleculeName : String! ) {
+    simulation {
+        time
+        environment {
+            nodes{
+              getConcentration(molecule: { name: $moleculeName } )
+            }
+        }
+    }
+}

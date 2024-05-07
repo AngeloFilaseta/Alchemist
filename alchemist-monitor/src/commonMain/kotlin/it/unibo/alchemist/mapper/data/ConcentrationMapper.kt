@@ -9,7 +9,11 @@
 
 package it.unibo.alchemist.mapper.data
 
+import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.api.Subscription
+import it.unibo.alchemist.boundary.graphql.client.AllQuery
+import it.unibo.alchemist.boundary.graphql.client.AllSubscription
+import it.unibo.alchemist.boundary.graphql.client.ConcentrationQuery
 import it.unibo.alchemist.boundary.graphql.client.ConcentrationSubscription
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
@@ -28,6 +32,13 @@ sealed class ConcentrationMapper(
 
     override fun invoke(data: Subscription.Data?): List<Double?> {
         return when (data) {
+            is AllSubscription.Data -> {
+                return data.simulation.environment.nodes.map { node ->
+                    node.contents.entries.filter {
+                        it.molecule.name.contains(moleculeName)
+                    }.map { entry -> transform(entry.concentration) }
+                }.flatten()
+            }
             is NodesSubscription.Data -> {
                 return data.simulation.environment.nodes.map { node ->
                     node.contents.entries.filter {
@@ -36,6 +47,24 @@ sealed class ConcentrationMapper(
                 }.flatten()
             }
             is ConcentrationSubscription.Data -> {
+                data.simulation.environment.nodes.map { node ->
+                    transform(node.getConcentration)
+                }
+            }
+            else -> emptyList()
+        }
+    }
+
+    override fun invoke(data: Query.Data?): List<Double?> {
+        return when (data) {
+            is AllQuery.Data -> {
+                return data.simulation.environment.nodes.map { node ->
+                    node.contents.entries.filter {
+                        it.molecule.name.contains(moleculeName)
+                    }.map { entry -> transform(entry.concentration) }
+                }.flatten()
+            }
+            is ConcentrationQuery.Data -> {
                 data.simulation.environment.nodes.map { node ->
                     transform(node.getConcentration)
                 }
@@ -61,5 +90,8 @@ data class AggregateConcentration(
         get() = concentrationMapper.outputName
 
     override fun invoke(data: Subscription.Data?): Double =
+        aggregationStrategy.aggregate(concentrationMapper.invoke(data).filterNotNull())
+
+    override fun invoke(data: Query.Data?): Double =
         aggregationStrategy.aggregate(concentrationMapper.invoke(data).filterNotNull())
 }
