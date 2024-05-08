@@ -24,6 +24,7 @@ import it.unibo.alchemist.state.actions.ResetEvaluation
 import it.unibo.alchemist.state.store
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import org.jetbrains.letsPlot.frontend.JsFrontendUtil
@@ -56,11 +57,13 @@ private val App = FC<Props> {
     var subscriptionController by useState(GraphQLSubscriptionController.fromClients(emptyList()))
     var dataframes by useState(emptyMap<GraphQLClient, DataFrame>())
     var mappers by useState<List<DataMapper<Double>>>(listOf())
-    var subscription by useState<Subscription<Subscription.Data>?>(null)
+    var subscription by useState<Subscription<*>?>(null)
+    var query by useState<Query<*>?>(null)
 
     store.subscribe {
         subscriptionController = store.state.subscriptionController
         subscription = store.state.currentSubscription
+        query = store.state.currentQuery
         mappers = store.state.mappers
         dataframes = store.state.dataframes
         evaluationDf = store.state.evaluationDf
@@ -75,16 +78,21 @@ private val App = FC<Props> {
         }
     }
 
-    useEffect(subscription) {
+    useEffect(subscription, query) {
         store.dispatch(ResetEvaluation)
     }
 
-    suspend fun subscribeAll(subscription: Subscription<Subscription.Data>) {
+    suspend fun subscribeAll(subscription: Subscription<*>) {
         subscriptionController.subscribe(subscription).mapValues { (client, flow) ->
             MainScope().launch {
                 flow.collect { response ->
                     listOf(
-                        Collect(client, mappers.map { m -> m.outputName to m.invoke(response.data) }),
+                        Collect(
+                            client,
+                            mappers.map { m ->
+                                m.outputName to m.invoke(response.data as Subscription.Data)
+                            },
+                        ),
                         AddTime(Clock.System.now().toEpochMilliseconds()),
                     ).forEach { store.dispatch(it) }
                 }
@@ -92,7 +100,7 @@ private val App = FC<Props> {
         }
     }
 
-    suspend fun queryAll(query: Query<Query.Data>) {
+    suspend fun queryAll(query: Query<*>) {
         subscriptionController.query(query).mapValues { (client, result) ->
             listOf(
                 Collect(client, mappers.map { m -> m.outputName to m.invoke(result.data) }),
@@ -127,6 +135,16 @@ private val App = FC<Props> {
         subscription?.let {
             sub {
                 subscribeAll(it)
+            }
+        }
+    }
+    useEffect(subscriptionController, query) {
+        query?.let {
+            sub {
+                while (true) {
+                    queryAll(it)
+                    delay(1000)
+                }
             }
         }
     }

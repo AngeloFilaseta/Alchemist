@@ -21,6 +21,6 @@ sealed interface SubscriptionAction
  * @param S the type of the data.
  * @param subscription the subscription to set.
  */
-data class SetSubscription<S : Subscription<*>>(
-    val subscription: @UnsafeVariance S,
-) : SubscriptionAction
+data class SetSubscription<S : Subscription<*>>(val subscription: S) : SubscriptionAction
+
+data object ClearSubscription : SubscriptionAction

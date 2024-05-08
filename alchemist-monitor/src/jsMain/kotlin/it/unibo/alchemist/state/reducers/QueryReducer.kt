@@ -6,27 +6,26 @@
  * GNU General Public License, with a linking exception,
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
+
 package it.unibo.alchemist.state.reducers
 
-import com.apollographql.apollo3.api.Subscription
+import com.apollographql.apollo3.api.Query
 import it.unibo.alchemist.dataframe.DataFrame
-import it.unibo.alchemist.state.actions.ClearSubscription
+import it.unibo.alchemist.state.actions.ClearQuery
 import it.unibo.alchemist.state.actions.DataFrameClear
-import it.unibo.alchemist.state.actions.SetSubscription
-import it.unibo.alchemist.state.actions.SubscriptionAction
+import it.unibo.alchemist.state.actions.QueryAction
+import it.unibo.alchemist.state.actions.SetQuery
 import it.unibo.alchemist.state.store
 
 /**
  * Redux reducer for the [DataFrame]s.
  */
-fun subscriptionReducer(
-    action: SubscriptionAction,
-): Subscription<*>? {
+fun queryReducer(action: QueryAction): Query<*>? {
     return when (action) {
-        is SetSubscription<*> -> {
+        is SetQuery<*> -> {
             store.dispatch(DataFrameClear)
-            action.subscription
+            action.query
         }
-        is ClearSubscription -> null
+        is ClearQuery -> null
     }
 }

@@ -38,6 +38,19 @@ interface GraphQLSubscriptionController {
     suspend fun <D : Query.Data> query(query: Query<D>): Map<GraphQLClient, ApolloResponse<D>> =
         clients.associateWith { client -> client.query(query).execute() }
 
+    /**
+     * Subscribe to a given subscription on all clients.
+     * @param subscription the subscription to be executed
+     * @return a map of clients and the associated flow of requested data
+     */
+    suspend fun subscribe(subscription: Subscription<*>): Map<GraphQLClient, Flow<ApolloResponse<*>>> =
+        clients.associateWith { it.subscription(subscription).toFlow() }
+
+    /**
+     * Execute a mutation on all clients.
+     * @param mutation the mutation to be executed.
+     * @return a map of clients and the associated response
+     */
     private suspend fun <D : Mutation.Data> mutation(mutation: Mutation<D>): Map<GraphQLClient, ApolloResponse<D>> =
         clients.associateWith { client -> client.mutation(mutation).execute() }
 
@@ -56,21 +69,10 @@ interface GraphQLSubscriptionController {
         mutation(PauseSimulationMutation())
 
     /**
-     * Subscribe to a given subscription on all clients.
-     * @param subscription the subscription to be executed
-     * @param filter a filter to be applied to the data
-     * @return a map of clients and the associated flow of requested data
-     */
-    fun subscribe(
-        subscription: Subscription<Subscription.Data>,
-        filter: (Subscription.Data) -> Boolean = { true },
-    ): Map<GraphQLClient, Flow<ApolloResponse<Subscription.Data>>>
-
-    /**
      * Close all clients that satisfy the given filter.
      * @param filter a filter to be applied to the clients.
      */
-    fun close(filter: (GraphQLClient) -> Boolean = { true })
+    fun close(filter: (GraphQLClient) -> Boolean) { clients.filter(filter).forEach { it.close() } }
 
     companion object {
         /**

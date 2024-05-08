@@ -10,18 +10,24 @@
 package it.unibo.alchemist.component
 
 import it.unibo.alchemist.Full
+import it.unibo.alchemist.InteractionType
 import it.unibo.alchemist.Limited
 import it.unibo.alchemist.Parameter
-import it.unibo.alchemist.SubscriptionSize
+import it.unibo.alchemist.ResponseSize
+import it.unibo.alchemist.boundary.graphql.client.AllQuery
+import it.unibo.alchemist.boundary.graphql.client.AllSubscription
+import it.unibo.alchemist.boundary.graphql.client.ConcentrationQuery
 import it.unibo.alchemist.boundary.graphql.client.ConcentrationSubscription
-import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
 import it.unibo.alchemist.component.sub.MutationButtons
 import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
-import it.unibo.alchemist.mapper.data.AggregateConcentration
+import it.unibo.alchemist.mapper.data.AggregateConcentrationMapper
 import it.unibo.alchemist.mapper.data.LocalSuccessConcentrationMapper
 import it.unibo.alchemist.mapper.data.TimeMapper
 import it.unibo.alchemist.state.actions.AddMapper
 import it.unibo.alchemist.state.actions.ClearMappers
+import it.unibo.alchemist.state.actions.ClearQuery
+import it.unibo.alchemist.state.actions.ClearSubscription
+import it.unibo.alchemist.state.actions.SetQuery
 import it.unibo.alchemist.state.actions.SetSubscription
 import it.unibo.alchemist.state.store
 import react.FC
@@ -36,43 +42,60 @@ import web.cssom.ClassName
 
 val Form = FC<Props>("Form") {
 
+    val interactiontypes by useState(listOf(InteractionType.Rest, InteractionType.GraphQL))
     val parameters by useState(listOf(Parameter.LocalSuccess))
-    val subSizes by useState(listOf(Limited, Full))
+    val responseSize by useState(listOf(Limited, Full))
 
+    var chosenInteractionType by useState<InteractionType?>(null)
     var chosenParameter by useState<Parameter?>(null)
-    var chosenSubscriptionSize by useState<SubscriptionSize?>(null)
+    var chosenResponseSize by useState<ResponseSize?>(null)
+
+    fun updateState(interactionType: InteractionType, parameter: Parameter, responseSize: ResponseSize) {
+        listOf(ClearQuery, ClearSubscription, ClearMappers).forEach { store.dispatch(it) }
+        console.log("A")
+        val action: Any = when (interactionType) {
+            InteractionType.Rest -> when (responseSize) {
+                is Full -> {
+                    console.log("b")
+                    SetQuery(AllQuery())
+                }
+                is Limited -> {
+                    console.log("c")
+                    SetQuery(ConcentrationQuery(parameter.toString()))
+                }
+            }
+            is InteractionType.GraphQL -> when (responseSize) {
+                is Full -> {
+                    console.log("d")
+                    SetSubscription(AllSubscription())
+                }
+                is Limited -> {
+                    console.log("e")
+                    SetSubscription(ConcentrationSubscription(parameter.toString()))
+                }
+            }
+        }
+        listOf(
+            action,
+            AddMapper(
+                TimeMapper(),
+                AggregateConcentrationMapper(LocalSuccessConcentrationMapper, AggregationStrategy.Max),
+            ),
+        ).forEach { store.dispatch(it) }
+    }
 
     fun updateState() {
-        when (chosenParameter) {
-            null -> {}
-            else -> {
-                store.dispatch(ClearMappers)
-                when (chosenSubscriptionSize) {
-                    Limited -> if (chosenParameter != null) {
-                        listOf(
-                            SetSubscription(ConcentrationSubscription(chosenParameter.toString())),
-                            AddMapper(
-                                TimeMapper(),
-                                AggregateConcentration(LocalSuccessConcentrationMapper, AggregationStrategy.Max),
-                            ),
-                        ).forEach { store.dispatch(it) }
-                    }
-                    Full -> {
-                        listOf(
-                            SetSubscription(NodesSubscription()),
-                            AddMapper(
-                                TimeMapper(),
-                                AggregateConcentration(LocalSuccessConcentrationMapper, AggregationStrategy.Max),
-                            ),
-                        ).forEach { store.dispatch(it) }
-                    }
-                    null -> {}
+        console.log("updating state")
+        chosenParameter?.let { parameter ->
+            chosenInteractionType?.let { interactionType ->
+                chosenResponseSize?.let { responseSize ->
+                    updateState(interactionType, parameter, responseSize)
                 }
             }
         }
     }
 
-    useEffect(chosenParameter, chosenSubscriptionSize) {
+    useEffect(chosenInteractionType, chosenParameter, chosenResponseSize) {
         updateState()
     }
 
@@ -83,6 +106,30 @@ val Form = FC<Props>("Form") {
         }
         div {
             className = ClassName("row")
+            // TYPE
+            h4 {
+                +"Interaction Type"
+            }
+            ReactHTML.select {
+                onChange = { event ->
+                    event.target.value.let {
+                        chosenInteractionType = InteractionType.fromString(it)
+                    }
+                }
+                className = ClassName("form-select")
+                ReactHTML.option {
+                    value = null
+                    selected = true
+                    +"Select the interaction type:"
+                }
+                interactiontypes.forEach { p ->
+                    ReactHTML.option {
+                        +p.toString()
+                        value = p
+                    }
+                }
+            }
+
             // PARAMETER
             h4 {
                 +"Parameters"
@@ -116,7 +163,7 @@ val Form = FC<Props>("Form") {
                 ReactHTML.select {
                     onChange = { event ->
                         event.target.value.let {
-                            chosenSubscriptionSize = SubscriptionSize.fromString(it)
+                            chosenResponseSize = ResponseSize.fromString(it)
                         }
                     }
                     className = ClassName("form-select")
@@ -125,7 +172,7 @@ val Form = FC<Props>("Form") {
                         selected = true
                         +"Select a subscription size:"
                     }
-                    subSizes.forEach { s ->
+                    responseSize.forEach { s ->
                         ReactHTML.option {
                             +s.toString()
                             value = s

@@ -12,7 +12,6 @@ package it.unibo.alchemist.component.sub
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.state.actions.AddSubscripionClient
 import it.unibo.alchemist.state.store
-import org.w3c.dom.HTMLInputElement
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.button
@@ -36,8 +35,7 @@ val AddSubscriptionClientForm = FC<Props>("AddSubscriptionClientForm") {
         placeholder = "Client Address (ex: localhost:8080)"
         value = inputText
         onChange = {
-            @Suppress("CAST_NEVER_SUCCEEDS")
-            inputText = (it.target as HTMLInputElement).value
+            inputText = it.target.value
         }
     }
     button {

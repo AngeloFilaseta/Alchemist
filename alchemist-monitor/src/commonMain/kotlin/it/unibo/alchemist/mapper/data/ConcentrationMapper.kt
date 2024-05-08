@@ -82,7 +82,7 @@ data object LocalSuccessConcentrationMapper : ConcentrationMapper(
     transform = { it?.toDoubleOrNull() },
 )
 
-data class AggregateConcentration(
+data class AggregateConcentrationMapper(
     val concentrationMapper: ConcentrationMapper,
     val aggregationStrategy: AggregationStrategy,
 ) : DataMapper<Double> {

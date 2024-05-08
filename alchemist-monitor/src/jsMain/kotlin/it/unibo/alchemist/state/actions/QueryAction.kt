@@ -7,14 +7,20 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-package it.unibo.alchemist.monitor.impl
+package it.unibo.alchemist.state.actions
 
-import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
-import it.unibo.alchemist.monitor.GraphQLSubscriptionController
+import com.apollographql.apollo3.api.Query
 
 /**
- * Implementation of [GraphQLSubscriptionController].
+ * An action to perform on a [Query].
  */
-internal data class GraphQLSubscriptionControllerImpl(
-    override val clients: List<GraphQLClient>,
-) : GraphQLSubscriptionController
+sealed interface QueryAction
+
+/**
+ * Set the current Query.
+ * @param S the type of the data.
+ * @param query the query to set.
+ */
+data class SetQuery<S : Query<*>>(val query: S) : QueryAction
+
+data object ClearQuery : QueryAction
