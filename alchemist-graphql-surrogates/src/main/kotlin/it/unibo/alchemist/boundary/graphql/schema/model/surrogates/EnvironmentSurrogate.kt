@@ -52,6 +52,13 @@ data class EnvironmentSurrogate<T, P : Position<out P>>(
     fun nodes() = origin.nodes.map { NodeSurrogate(it) }
 
     /**
+     * The number of nodes in this environment.
+     * @return the number of nodes in this environment.
+     */
+    @GraphQLDescription("The number of nodes in this environment")
+    fun nodesCount() = origin.nodes.size
+
+    /**
      * The layers inside this environment.
      * @return the layers in this environment.
      */

@@ -19,14 +19,21 @@ import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("MonitorLauncher")
 
-class MonitorLauncher(
-    val host: String = "127.0.0.1",
-    val port: Int = 9090,
+open class MonitorLauncher @JvmOverloads constructor(
+    private val host: String = "127.0.0.1",
+    private val port: Int = 9090,
     override val batch: List<String> = emptyList(),
     override val autoStart: Boolean = true,
     override val showProgress: Boolean = true,
     override val parallelism: Int = Runtime.getRuntime().availableProcessors(),
 ) : DefaultLauncher(batch, autoStart, showProgress, parallelism) {
+
+    @JvmOverloads constructor(
+        autoStart: Boolean,
+        showProgress: Boolean = true,
+        parallelism: Int = Runtime.getRuntime().availableProcessors(),
+    ) : this("127.0.0.1", 9090, emptyList(), autoStart, showProgress, parallelism)
+
     override fun launch(loader: Loader) {
         CoroutineScope(Dispatchers.IO).launch {
             logger.info("Starting monitor server on $host:$port")
