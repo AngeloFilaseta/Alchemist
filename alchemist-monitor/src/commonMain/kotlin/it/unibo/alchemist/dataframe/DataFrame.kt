@@ -17,20 +17,23 @@ import org.jetbrains.letsPlot.letsPlot
  */
 interface DataFrame {
 
-    val cols: List<Col<Any?>>
+    /**
+     * The columns of the data frame.
+     */
+    val cols: List<Col<*>>
 
     /**
      * Get a column by name.
      * @return the column with the given name, or null if it does not exist.
      */
-    fun col(name: String): Col<Any?>? = cols.firstOrNull { it.name == name }
+    fun col(name: String): Col<*>? = cols.firstOrNull { it.name == name }
 
     /**
      * Add a new column to the data frame.
      * @return a new data frame with the new data added.
      */
-    fun add(colName: String, data: Any?): DataFrame {
-        val newCol = (cols.find { it.name == colName } ?: Col(colName, emptyList())) + data
+    fun <D : Any?>add(colName: String, data: D): DataFrame {
+        val newCol = (cols.find { it.name == colName } ?: Col(colName, listOf(data)))
         val newCols = cols.filter { it.name != colName } + newCol
         return DataFrameImpl(newCols)
     }
@@ -58,7 +61,7 @@ interface DataFrame {
  * A data frame, containing a list of columns.
  * @property cols the columns of the data frame.
  */
-data class DataFrameImpl internal constructor(override val cols: List<Col<Any?>>) : DataFrame {
+data class DataFrameImpl internal constructor(override val cols: List<Col<*>>) : DataFrame {
     override fun toString(): String {
         return "DataFrame(${cols.map { col -> col.name + ": " + col.data}})"
     }

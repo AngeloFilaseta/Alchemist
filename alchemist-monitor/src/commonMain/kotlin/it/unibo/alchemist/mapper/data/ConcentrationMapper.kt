@@ -16,7 +16,6 @@ import it.unibo.alchemist.boundary.graphql.client.AllSubscription
 import it.unibo.alchemist.boundary.graphql.client.ConcentrationQuery
 import it.unibo.alchemist.boundary.graphql.client.ConcentrationSubscription
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
-import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
 
 /**
  * Map the concentration of a molecule to a list of values.
@@ -33,14 +32,14 @@ sealed class ConcentrationMapper(
     override fun invoke(data: Subscription.Data?): List<Double?> {
         return when (data) {
             is AllSubscription.Data -> {
-                return data.simulation.environment.nodes.map { node ->
+                data.simulation.environment.nodes.map { node ->
                     node.contents.entries.filter {
                         it.molecule.name.contains(moleculeName)
                     }.map { entry -> transform(entry.concentration) }
                 }.flatten()
             }
             is NodesSubscription.Data -> {
-                return data.simulation.environment.nodes.map { node ->
+                data.simulation.environment.nodes.map { node ->
                     node.contents.entries.filter {
                         it.molecule.name.contains(moleculeName)
                     }.map { entry -> transform(entry.concentration) }
@@ -81,17 +80,3 @@ data object LocalSuccessConcentrationMapper : ConcentrationMapper(
     moleculeName = "localSuccess",
     transform = { it?.toDoubleOrNull() },
 )
-
-data class AggregateConcentrationMapper(
-    val concentrationMapper: ConcentrationMapper,
-    val aggregationStrategy: AggregationStrategy,
-) : DataMapper<Double> {
-    override val outputName: String
-        get() = concentrationMapper.outputName
-
-    override fun invoke(data: Subscription.Data?): Double =
-        aggregationStrategy.aggregate(concentrationMapper.invoke(data).filterNotNull())
-
-    override fun invoke(data: Query.Data?): Double =
-        aggregationStrategy.aggregate(concentrationMapper.invoke(data).filterNotNull())
-}

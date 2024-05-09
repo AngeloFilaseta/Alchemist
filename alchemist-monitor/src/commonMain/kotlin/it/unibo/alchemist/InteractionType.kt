@@ -9,18 +9,32 @@
 
 package it.unibo.alchemist
 
+/**
+ * Represents an interaction type.
+ */
 sealed interface InteractionType {
+    /**
+     * The Rest interaction type.
+     */
     data object Rest : InteractionType {
         override fun toString(): String {
             return "Rest"
         }
     }
+
+    /**
+     * The GraphQL interaction type.
+     */
     data object GraphQL : InteractionType {
         override fun toString(): String {
             return "GraphQL"
         }
     }
     companion object {
+        /**
+         * Create an InteractionType object from a string.
+         * @param value the string to parse
+         */
         fun fromString(value: String): InteractionType? {
             return when (value) {
                 Rest.toString() -> Rest

@@ -18,33 +18,35 @@ sealed interface AggregationStrategy {
      * @param values the list of values to aggregate.
      * @return the aggregated value.
      */
-    fun aggregate(values: List<Double>): Double
+    fun aggregate(values: List<Number>): Double
 
     /**
      * Strategy to calculate the average of a list of values.
      */
     data object Average : AggregationStrategy {
-        override fun aggregate(values: List<Double>): Double = values.average()
+        override fun aggregate(values: List<Number>): Double = Sum.aggregate(values) / values.size.toDouble()
     }
 
     /**
      * Strategy to calculate the sum of a list of values.
      */
     data object Sum : AggregationStrategy {
-        override fun aggregate(values: List<Double>): Double = values.sum()
+        override fun aggregate(values: List<Number>): Double = values.reduce { a, b ->
+            a.toDouble() + b.toDouble()
+        }.toDouble()
     }
 
     /**
      * Strategy to calculate the maximum of a list of values.
      */
     data object Max : AggregationStrategy {
-        override fun aggregate(values: List<Double>): Double = values.maxOrNull() ?: Double.NaN
+        override fun aggregate(values: List<Number>): Double = values.maxOfOrNull { it.toDouble() } ?: Double.NaN
     }
 
     /**
      * Strategy to calculate the minimum of a list of values.
      */
     data object Min : AggregationStrategy {
-        override fun aggregate(values: List<Double>): Double = values.minOrNull() ?: Double.NaN
+        override fun aggregate(values: List<Number>): Double = values.minOfOrNull { it.toDouble() } ?: Double.NaN
     }
 }

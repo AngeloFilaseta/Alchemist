@@ -13,6 +13,10 @@ package it.unibo.alchemist.dataframe
 import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
 import kotlin.math.abs
 
+/**
+ * A DataFrame that aggregates multiple dataframes.
+ * @param allDataFrames the list of dataframes to aggregate.
+ */
 data class AggregatedDataFrame(
     private val allDataFrames: List<DataFrame>,
     private val aggregationStrategy: AggregationStrategy,
@@ -46,12 +50,14 @@ data class AggregatedDataFrame(
         // all columns mapped to the new values of th
         val mappedDf = dataFrames.map { df ->
             // I search for the time column in each DF
-            val dfColTime = df.col(Col.TIME_NAME)
+            val dfColTime = df.col(Col.TIME_NAME) ?: error("Time column should be present at this point.")
                 /*
                 I create a list of INDEXES for each DF. These are the indexes of the nearest time to the time
                 in the timeCol. Now it's time to create the new data for each param using this lookup.
                  */
-            val mappingList = timeCol.data.map { target -> nearestIndex(target, dfColTime?.data as List<Double>) }
+            val mappingList = timeCol.data.map { target ->
+                nearestIndex(target, dfColTime.data.map { (it as Number).toDouble() })
+            }
 
             // creating the new Cols
             val newCols = df.cols.map { col ->
@@ -62,7 +68,7 @@ data class AggregatedDataFrame(
         val names = mappedDf.flatMap { df -> df.cols.map { col -> col.name } }.toSet()
 
         val otherCols = names.map { name ->
-            val namedColums = mappedDf.mapNotNull { df -> df.col(name) } as List<Col<Double>>
+            val namedColums = mappedDf.mapNotNull { df -> df.col(name) }
             combineCols(namedColums, aggregationStrategy)
         }
         return listOf(timeCol) + otherCols
@@ -83,11 +89,11 @@ data class AggregatedDataFrame(
         return list.indexOf(nearest(target, list))
     }
 
-    fun combineCols(lists: List<Col<Double>>, aggregationStrategy: AggregationStrategy): Col<Double> {
-        return Col(lists.first().name, combineLists(lists.map { it.data }, aggregationStrategy))
+    private fun combineCols(lists: List<Col<*>>, aggregationStrategy: AggregationStrategy): Col<Double> {
+        return Col(lists.first().name, combineLists(lists.map { it.data as List<Number> }, aggregationStrategy))
     }
 
-    private fun combineLists(lists: List<List<Double>>, aggregationStrategy: AggregationStrategy): List<Double> {
+    private fun combineLists(lists: List<List<Number>>, aggregationStrategy: AggregationStrategy): List<Double> {
         return (0 until lists[0].size).map { index ->
             aggregationStrategy.aggregate(lists.map { it[index] })
         }

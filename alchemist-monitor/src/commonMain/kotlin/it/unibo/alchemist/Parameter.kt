@@ -9,12 +9,22 @@
 
 package it.unibo.alchemist
 
+/**
+ * Represents a parameter.
+ */
 sealed interface Parameter {
+    /**
+     * The LocalSuccess Parameter from the Collektive project.
+     */
     data object LocalSuccess : Parameter {
         override fun toString(): String = "localSuccess"
     }
 
     companion object {
+        /**
+         * Create a Parameter object from a string.
+         * @param value the string to parse
+         */
         fun fromString(value: String): Parameter? {
             return when (value) {
                 LocalSuccess.toString() -> LocalSuccess
