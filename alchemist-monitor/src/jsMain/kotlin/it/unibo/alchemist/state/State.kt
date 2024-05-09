@@ -32,6 +32,10 @@ import it.unibo.alchemist.state.reducers.subscriptionReducer
  * State of the monitor component.
  * @param subscriptionController the [GraphQLSubscriptionController] that manages the subscriptions.
  * @param dataframes the dataframes associated with each [Subscription] to each [GraphQLClient].
+ * @param currentSubscription the current subscription.
+ * @param currentQuery the current query.
+ * @param mappers the list of [DataMapper]s.
+ * @param evaluationDf the dataframe used for evaluation.
  */
 data class State(
     val subscriptionController: GraphQLSubscriptionController =

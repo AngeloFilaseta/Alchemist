@@ -9,8 +9,18 @@
 
 package it.unibo.alchemist.state.actions
 
+/**
+ * Represents an action that can be dispatched to edit the evaluation state.
+ */
 sealed interface EvaluationAction
 
+/**
+ * Add a time to the evaluation state.
+ * @param time the time to add.
+ */
 data class AddTime(val time: Long) : EvaluationAction
 
+/**
+ * Reset the evaluation state.
+ */
 data object ResetEvaluation : EvaluationAction

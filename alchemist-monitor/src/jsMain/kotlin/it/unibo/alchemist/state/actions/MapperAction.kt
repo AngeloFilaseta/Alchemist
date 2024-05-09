@@ -11,16 +11,30 @@ package it.unibo.alchemist.state.actions
 
 import it.unibo.alchemist.mapper.data.DataMapper
 
+/**
+ * Represents an action that can be dispatched to edit the list of mappers.
+ */
 sealed interface MapperAction
 
+/**
+ * Add a list of mappers to the current list.
+ * @param mappers the list of mappers to add.
+ */
 data class AddMapper(
     val mappers: List<DataMapper<Double>>,
 ) : MapperAction {
     companion object {
+        /**
+         * Alternative constructor.
+         * @param mappers the list of mappers to add.
+         */
         operator fun invoke(vararg mappers: DataMapper<Double>): AddMapper {
             return AddMapper(mappers.toList())
         }
     }
 }
 
+/**
+ * Clear the list of mappers.
+ */
 data object ClearMappers : MapperAction

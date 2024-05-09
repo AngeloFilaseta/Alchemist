@@ -23,4 +23,7 @@ sealed interface QueryAction
  */
 data class SetQuery<S : Query<*>>(val query: S) : QueryAction
 
+/**
+ * Clear the current Query.
+ */
 data object ClearQuery : QueryAction

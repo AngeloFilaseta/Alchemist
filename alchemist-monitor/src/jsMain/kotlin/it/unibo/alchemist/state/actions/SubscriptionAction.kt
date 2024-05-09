@@ -23,4 +23,7 @@ sealed interface SubscriptionAction
  */
 data class SetSubscription<S : Subscription<*>>(val subscription: S) : SubscriptionAction
 
+/**
+ * Clear the current subscription.
+ */
 data object ClearSubscription : SubscriptionAction

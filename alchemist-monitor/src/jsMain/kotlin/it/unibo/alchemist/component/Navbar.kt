@@ -17,6 +17,9 @@ import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.nav
 import web.cssom.ClassName
 
+/**
+ * Navbar component.
+ */
 val Navbar = FC<Props>("MutationButtons") {
     nav {
         className = ClassName("navbar navbar-expand-lg bg-primary")

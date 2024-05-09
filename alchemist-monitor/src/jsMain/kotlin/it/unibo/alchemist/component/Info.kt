@@ -9,12 +9,10 @@
 
 package it.unibo.alchemist.component
 
-import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.ConcentrationSubscription
-import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.boundary.graphql.client.NodesSubscription
+import it.unibo.alchemist.component.props.InfoProps
 import react.FC
-import react.Props
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.h4
@@ -27,12 +25,9 @@ import react.dom.html.ReactHTML.thead
 import react.dom.html.ReactHTML.tr
 import web.cssom.ClassName
 
-external interface InfoProps : Props {
-    var clients: List<GraphQLClient>
-    var currentSubscription: Subscription<*>?
-    var averageTime: Int
-}
-
+/**
+ * Info component.
+ */
 val Info = FC("Info") { props: InfoProps ->
     val clients = props.clients
     val subscription = props.currentSubscription

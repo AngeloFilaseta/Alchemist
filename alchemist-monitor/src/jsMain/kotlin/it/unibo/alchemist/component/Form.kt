@@ -40,6 +40,9 @@ import react.useEffect
 import react.useState
 import web.cssom.ClassName
 
+/**
+ * Form component.
+ */
 val Form = FC<Props>("Form") {
 
     val interactiontypes by useState(listOf(InteractionType.Rest, InteractionType.GraphQL))

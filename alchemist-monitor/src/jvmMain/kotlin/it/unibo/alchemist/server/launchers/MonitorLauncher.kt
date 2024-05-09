@@ -19,6 +19,15 @@ import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("MonitorLauncher")
 
+/**
+ * A launcher that starts the monitor server.
+ * @param host the host to bind the server to
+ * @param port the port to bind the server to
+ * @param batch the list of batch files to load
+ * @param autoStart whether to start the simulation automatically
+ * @param showProgress whether to show the progress bar
+ * @param parallelism the number of threads to use
+ */
 open class MonitorLauncher @JvmOverloads constructor(
     private val host: String = "127.0.0.1",
     private val port: Int = 9090,
@@ -28,6 +37,12 @@ open class MonitorLauncher @JvmOverloads constructor(
     override val parallelism: Int = Runtime.getRuntime().availableProcessors(),
 ) : DefaultLauncher(batch, autoStart, showProgress, parallelism) {
 
+    /**
+     * Alternative constructor.
+     * @param autoStart whether to start the simulation automatically
+     * @param showProgress whether to show the progress bar
+     * @param parallelism the number of threads to use
+     */
     @JvmOverloads constructor(
         autoStart: Boolean,
         showProgress: Boolean = true,
