@@ -39,7 +39,11 @@ data class AggregatedDataFrame(
             dataframe.cols.filter { col -> col.name == Col.TIME_NAME }.flatMap { col -> col.data }
         }
         val allTime = allTimeData.flatten() as List<Double>
-        return Triple(allTime.min(), allTime.max(), allTimeData.map { it.size }.average().toInt())
+        return if (allTime.isNotEmpty()) {
+            Triple(allTime.min(), allTime.max(), allTimeData.map { it.size }.average().toInt())
+        } else {
+            Triple(0.0, 0.0, 0)
+        }
     }
 
     private fun generateCols(): List<Col<*>> {

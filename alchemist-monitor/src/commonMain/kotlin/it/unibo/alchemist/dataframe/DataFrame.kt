@@ -32,8 +32,9 @@ interface DataFrame {
      * Add a new column to the data frame.
      * @return a new data frame with the new data added.
      */
+    @Suppress("UNCHECKED_CAST")
     fun <D : Any?>add(colName: String, data: D): DataFrame {
-        val newCol = (cols.find { it.name == colName } ?: Col(colName, listOf(data)))
+        val newCol = (cols.find { it.name == colName } as Col<D>? ?: Col(colName, emptyList())) + data
         val newCols = cols.filter { it.name != colName } + newCol
         return DataFrameImpl(newCols)
     }

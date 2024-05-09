@@ -59,21 +59,17 @@ val Form = FC<Props>("Form") {
         val action: Any = when (interactionType) {
             InteractionType.Rest -> when (responseSize) {
                 is Full -> {
-                    console.log("b")
                     SetQuery(AllQuery())
                 }
                 is Limited -> {
-                    console.log("c")
                     SetQuery(ConcentrationQuery(parameter.toString()))
                 }
             }
             is InteractionType.GraphQL -> when (responseSize) {
                 is Full -> {
-                    console.log("d")
                     SetSubscription(AllSubscription())
                 }
                 is Limited -> {
-                    console.log("e")
                     SetSubscription(ConcentrationSubscription(parameter.toString()))
                 }
             }

@@ -12,7 +12,8 @@ package it.unibo.alchemist.server.launchers
 import io.ktor.server.netty.EngineMain
 import it.unibo.alchemist.boundary.Loader
 import it.unibo.alchemist.boundary.launchers.DefaultLauncher
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
@@ -49,7 +50,7 @@ open class MonitorLauncher @JvmOverloads constructor(
     ) : this("127.0.0.1", DEFAULT_PORT, emptyList(), autoStart, showProgress, parallelism)
 
     override fun launch(loader: Loader) {
-        MainScope().launch {
+        CoroutineScope(Dispatchers.IO).launch {
             logger.info("Starting monitor server on $host:$port")
             EngineMain.main(emptyArray())
         }
