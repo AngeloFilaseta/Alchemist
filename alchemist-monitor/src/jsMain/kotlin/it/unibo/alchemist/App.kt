@@ -15,6 +15,7 @@ import it.unibo.alchemist.component.Form
 import it.unibo.alchemist.component.Info
 import it.unibo.alchemist.component.Navbar
 import it.unibo.alchemist.dataframe.AggregatedDataFrame
+import it.unibo.alchemist.dataframe.Col
 import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
 import it.unibo.alchemist.mapper.data.DataMapper
@@ -54,7 +55,7 @@ fun main() {
 
 private val App = FC<Props> {
 
-//    var evaluationDf by useState(DataFrame.empty())
+    var evaluationDf by useState(DataFrame.empty())
     var avgTime by useState(0)
     var subscriptionController by useState(GraphQLSubscriptionController.fromClients(emptyList()))
     var dataframes by useState(emptyMap<GraphQLClient, DataFrame>())
@@ -70,17 +71,17 @@ private val App = FC<Props> {
         mappers = store.state.mappers
         dataframes = store.state.dataframes
         aggregatedDf = AggregatedDataFrame(dataframes.values.toList(), AggregationStrategy.Average)
-//        evaluationDf = store.state.evaluationDf
+        evaluationDf = store.state.evaluationDf
     }
 
-//    @Suppress("UNCHECKED_CAST")
-//    useEffect(evaluationDf) {
-//        val timeCol = evaluationDf.cols.firstOrNull { it.name == Col.TIME_NAME }
-//        timeCol?.let {
-//            val d = timeCol.data as List<Long>
-//            avgTime = d.map { it - d.min() }.zipWithNext { a, b -> b - a }.average().toInt()
-//        }
-//    }
+    @Suppress("UNCHECKED_CAST")
+    useEffect(evaluationDf) {
+        val timeCol = evaluationDf.cols.firstOrNull { it.name == Col.TIME_NAME }
+        timeCol?.let {
+            val d = timeCol.data as List<Long>
+            avgTime = d.map { it - d.min() }.zipWithNext { a, b -> b - a }.average().toInt()
+        }
+    }
 
     useEffect(subscription, query) {
         store.dispatch(ResetEvaluation)
@@ -90,7 +91,6 @@ private val App = FC<Props> {
         subscriptionController.subscribe(subscription).mapValues { (client, flow) ->
             MainScope().launch {
                 flow.collect { response ->
-                    console.log("b")
                     listOf(
                         Collect(
                             client,
@@ -135,7 +135,6 @@ private val App = FC<Props> {
         val contentDiv = document.getElementById("plot")
         contentDiv?.innerHTML = ""
         map.map { (client, df) ->
-            console.log(df.col("localSuccess")!!.data)
             generatePlotdiv(df, "localSuccess", client.serverUrl(), "red")
         }.forEach {
             contentDiv?.appendChild(it)
@@ -148,7 +147,6 @@ private val App = FC<Props> {
     useEffect(subscriptionController, subscription) {
         subscription?.let {
             sub {
-                console.log("Subscribing")
                 subscribeAll(it)
             }
         }
@@ -158,7 +156,6 @@ private val App = FC<Props> {
             sub {
                 while (true) {
                     queryAll(it)
-                    console.log("a")
                     delay(1000)
                 }
             }

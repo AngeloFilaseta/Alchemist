@@ -55,7 +55,6 @@ val Form = FC<Props>("Form") {
 
     fun updateState(interactionType: InteractionType, parameter: Parameter, responseSize: ResponseSize) {
         listOf(ClearQuery, ClearSubscription, ClearMappers).forEach { store.dispatch(it) }
-        console.log("A")
         val action: Any = when (interactionType) {
             InteractionType.Rest -> when (responseSize) {
                 is Full -> {
@@ -84,7 +83,6 @@ val Form = FC<Props>("Form") {
     }
 
     fun updateState() {
-        console.log("updating state")
         chosenParameter?.let { parameter ->
             chosenInteractionType?.let { interactionType ->
                 chosenResponseSize?.let { responseSize ->
