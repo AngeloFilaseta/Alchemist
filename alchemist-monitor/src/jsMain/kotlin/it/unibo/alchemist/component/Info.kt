@@ -16,7 +16,6 @@ import react.FC
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.h4
-import react.dom.html.ReactHTML.h5
 import react.dom.html.ReactHTML.p
 import react.dom.html.ReactHTML.table
 import react.dom.html.ReactHTML.tbody
@@ -71,12 +70,6 @@ val Info = FC("Info") { props: InfoProps ->
                     }
                 }
             }
-        }
-        h5 {
-            +"Average time of response"
-        }
-        p {
-            +"${props.averageTime}ms"
         }
     }
 }

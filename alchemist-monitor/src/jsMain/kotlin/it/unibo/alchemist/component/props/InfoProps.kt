@@ -17,10 +17,8 @@ import react.Props
  * Props for the Info component.
  * @property clients the list of clients
  * @property currentSubscription the current subscription
- * @property averageTime the average time of response
  */
 external interface InfoProps : Props {
     var clients: List<GraphQLClient>
     var currentSubscription: Subscription<*>?
-    var averageTime: Int
 }

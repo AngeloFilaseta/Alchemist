@@ -54,7 +54,7 @@ data class AggregatedDataFrame(
         // all columns mapped to the new values of th
         val mappedDf = dataFrames.map { df ->
             // I search for the time column in each DF
-            val dfColTime = df.col(Col.TIME_NAME) ?: error("Time column should be present at this point.")
+            val dfColTime = df.getColumn(Col.TIME_NAME) ?: error("Time column should be present at this point.")
                 /*
                 I create a list of INDEXES for each DF. These are the indexes of the nearest time to the time
                 in the timeCol. Now it's time to create the new data for each param using this lookup.
@@ -72,7 +72,7 @@ data class AggregatedDataFrame(
         val names = mappedDf.flatMap { df -> df.cols.map { col -> col.name } }.toSet()
 
         val otherCols = names.map { name ->
-            val namedColums = mappedDf.mapNotNull { df -> df.col(name) }
+            val namedColums = mappedDf.mapNotNull { df -> df.getColumn(name) }
             combineCols(namedColums, aggregationStrategy)
         }
         return listOf(timeCol) + otherCols

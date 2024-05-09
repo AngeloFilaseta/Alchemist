@@ -15,25 +15,17 @@ import it.unibo.alchemist.component.Form
 import it.unibo.alchemist.component.Info
 import it.unibo.alchemist.component.Navbar
 import it.unibo.alchemist.dataframe.AggregatedDataFrame
-import it.unibo.alchemist.dataframe.Col
 import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
+import it.unibo.alchemist.logic.GraphRenderer
+import it.unibo.alchemist.logic.RequestAll.queryAll
+import it.unibo.alchemist.logic.RequestAll.subscribeAll
 import it.unibo.alchemist.mapper.data.DataMapper
 import it.unibo.alchemist.monitor.GraphQLSubscriptionController
-import it.unibo.alchemist.state.actions.AddTime
-import it.unibo.alchemist.state.actions.Collect
 import it.unibo.alchemist.state.actions.ResetEvaluation
 import it.unibo.alchemist.state.store
 import kotlinx.browser.document
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import org.jetbrains.letsPlot.frontend.JsFrontendUtil
-import org.jetbrains.letsPlot.geom.geomLine
-import org.jetbrains.letsPlot.intern.Plot
-import org.w3c.dom.HTMLDivElement
-import react.EffectBuilder
 import react.FC
 import react.Props
 import react.create
@@ -55,8 +47,6 @@ fun main() {
 
 private val App = FC<Props> {
 
-    var evaluationDf by useState(DataFrame.empty())
-    var avgTime by useState(0)
     var subscriptionController by useState(GraphQLSubscriptionController.fromClients(emptyList()))
     var dataframes by useState(emptyMap<GraphQLClient, DataFrame>())
     var mappers by useState<List<DataMapper<Double>>>(listOf())
@@ -71,91 +61,25 @@ private val App = FC<Props> {
         mappers = store.state.mappers
         dataframes = store.state.dataframes
         aggregatedDf = AggregatedDataFrame(dataframes.values.toList(), AggregationStrategy.Average)
-        evaluationDf = store.state.evaluationDf
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    useEffect(evaluationDf) {
-        val timeCol = evaluationDf.cols.firstOrNull { it.name == Col.TIME_NAME }
-        timeCol?.let {
-            val d = timeCol.data as List<Long>
-            avgTime = d.map { it - d.min() }.zipWithNext { a, b -> b - a }.average().toInt()
-        }
     }
 
     useEffect(subscription, query) {
         store.dispatch(ResetEvaluation)
     }
 
-    suspend fun subscribeAll(subscription: Subscription<*>) {
-        subscriptionController.subscribe(subscription).mapValues { (client, flow) ->
-            MainScope().launch {
-                flow.collect { response ->
-                    listOf(
-                        Collect(
-                            client,
-                            mappers.map { m ->
-                                m.outputName to m.invoke(response.data as Subscription.Data)
-                            },
-                        ),
-                        AddTime(Clock.System.now().toEpochMilliseconds()),
-                    ).forEach { store.dispatch(it) }
-                }
-            }
-        }
-    }
-
-    suspend fun queryAll(query: Query<*>) {
-        subscriptionController.query(query).mapValues { (client, result) ->
-            listOf(
-                Collect(client, mappers.map { m -> m.outputName to m.invoke(result.data) }),
-                AddTime(Clock.System.now().toEpochMilliseconds()),
-            ).forEach { store.dispatch(it) }
-        }
-    }
-
-    fun generatePlot(df: DataFrame, yName: String, color: String): Plot {
-        return df.toPlot() + geomLine(color = color) {
-            x = "time"
-            y = yName
-        }
-    }
-
-    fun generatePlotdiv(df: DataFrame, yName: String, caption: String, color: String): HTMLDivElement {
-        val plotDiv = JsFrontendUtil.createPlotDiv(generatePlot(df, yName, color))
-        plotDiv.appendChild(
-            document.createElement("p").apply {
-                innerHTML = caption
-            },
-        )
-        return plotDiv
-    }
-
-    fun addPlotDiv(map: Map<GraphQLClient, DataFrame>, aggregatedDataFrame: AggregatedDataFrame) {
-        val contentDiv = document.getElementById("plot")
-        contentDiv?.innerHTML = ""
-        map.map { (client, df) ->
-            generatePlotdiv(df, "localSuccess", client.serverUrl(), "red")
-        }.forEach {
-            contentDiv?.appendChild(it)
-        }
-        val aggregateDiv = generatePlotdiv(aggregatedDataFrame, "localSuccess", "AGGREGATE", "blue")
-        contentDiv?.appendChild(aggregateDiv)
-    }
-
-    // COMPONENT
     useEffect(subscriptionController, subscription) {
-        subscription?.let {
-            sub {
-                subscribeAll(it)
+        subscription?.let { s ->
+            launchWithCleanup {
+                subscribeAll(subscriptionController, mappers, s)
             }
         }
     }
+
     useEffect(subscriptionController, query) {
-        query?.let {
-            sub {
+        query?.let { q ->
+            launchWithCleanup {
                 while (true) {
-                    queryAll(it)
+                    queryAll(subscriptionController, mappers, q)
                     delay(1000)
                 }
             }
@@ -163,7 +87,7 @@ private val App = FC<Props> {
     }
 
     useEffect(listOf(dataframes, aggregatedDf)) {
-        addPlotDiv(dataframes, aggregatedDf)
+        GraphRenderer.renderPlots(dataframes, aggregatedDf)
     }
 
     Navbar()
@@ -173,20 +97,6 @@ private val App = FC<Props> {
         Info {
             clients = subscriptionController.clients
             currentSubscription = subscription
-            averageTime = avgTime
         }
-    }
-}
-
-private fun EffectBuilder.sub(block: suspend () -> Unit) {
-    var ignore = false
-    val job = MainScope().launch {
-        if (!ignore) {
-            block()
-        }
-    }
-    cleanup {
-        job.cancel()
-        ignore = true
     }
 }

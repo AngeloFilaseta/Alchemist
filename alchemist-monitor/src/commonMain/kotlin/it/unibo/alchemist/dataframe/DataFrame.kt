@@ -7,6 +7,8 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
+@file:Suppress("UNCHECKED_CAST")
+
 package it.unibo.alchemist.dataframe
 
 import org.jetbrains.letsPlot.intern.Plot
@@ -26,13 +28,18 @@ interface DataFrame {
      * Get a column by name.
      * @return the column with the given name, or null if it does not exist.
      */
-    fun col(name: String): Col<*>? = cols.firstOrNull { it.name == name }
+    fun getColumn(name: String): Col<*>? = cols.firstOrNull { it.name == name }
+
+    /**
+     * Get a column by name, with the specified type.
+     * @return the column with the given name, or null if it does not exist.
+     */
+    fun <D> getColumnTypedUnsafe(name: String): Col<D>? = getColumn(name) as Col<D>
 
     /**
      * Add a new column to the data frame.
      * @return a new data frame with the new data added.
      */
-    @Suppress("UNCHECKED_CAST")
     fun <D : Any?>add(colName: String, data: D): DataFrame {
         val newCol = (cols.find { it.name == colName } as Col<D>? ?: Col(colName, emptyList())) + data
         val newCols = cols.filter { it.name != colName } + newCol

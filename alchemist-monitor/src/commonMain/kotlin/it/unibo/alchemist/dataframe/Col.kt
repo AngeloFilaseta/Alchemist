@@ -16,6 +16,14 @@ package it.unibo.alchemist.dataframe
  * @property data the data in the column.
  */
 data class Col<D>(val name: String, val data: List<D>) {
+
+    /**
+     * Get the data as a list of the specified type.
+     * @return the data as a list of the specified type.
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <D> getTypedDataUnsafe(): List<D> = data as List<D>
+
     /**
      * Add a new element to the data list.
      */

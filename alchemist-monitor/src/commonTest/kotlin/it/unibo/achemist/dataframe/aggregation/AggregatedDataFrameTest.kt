@@ -40,9 +40,9 @@ class AggregatedDataFrameTest : WordSpec({
             val avgDf = AggregatedDataFrame(listOf(df0, df1), AggregationStrategy.Average)
 
             listOf(sumDf, avgDf).forEach { df ->
-                df.col("time") ?: fail("Time column not found")
-                df.col("a") ?: fail("A column not found")
-                df.col("b") ?: fail("B column not found")
+                df.getColumn("time") ?: fail("Time column not found")
+                df.getColumn("a") ?: fail("A column not found")
+                df.getColumn("b") ?: fail("B column not found")
             }
         }
     }
