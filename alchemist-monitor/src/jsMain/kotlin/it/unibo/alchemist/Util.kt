@@ -9,17 +9,18 @@
 
 package it.unibo.alchemist
 
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import react.EffectBuilder
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Launch a coroutine with a cleanup block that is launched when the effect is disposed.
  * @param block the block to execute
  */
-fun EffectBuilder.launchWithCleanup(block: suspend () -> Unit) {
+fun EffectBuilder.launchWithCleanup(context: CoroutineContext, block: suspend () -> Unit) {
     var ignore = false
-    val job = MainScope().launch {
+    val job = CoroutineScope(context).launch {
         if (!ignore) {
             block()
         }

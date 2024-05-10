@@ -22,16 +22,9 @@ import it.unibo.alchemist.component.props.FormProps
 import it.unibo.alchemist.component.sub.FormElement
 import it.unibo.alchemist.component.sub.MutationButtons
 import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
-import it.unibo.alchemist.mapper.data.AggregateConcentrationMapper
-import it.unibo.alchemist.mapper.data.LocalSuccessConcentrationMapper
-import it.unibo.alchemist.mapper.data.TimeMapper
-import it.unibo.alchemist.state.actions.AddMapper
-import it.unibo.alchemist.state.actions.ClearMappers
-import it.unibo.alchemist.state.actions.ClearQuery
-import it.unibo.alchemist.state.actions.ClearSubscription
-import it.unibo.alchemist.state.actions.SetQuery
-import it.unibo.alchemist.state.actions.SetSubscription
-import it.unibo.alchemist.state.store
+import it.unibo.alchemist.monitor.GraphQLController
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import react.FC
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
@@ -57,32 +50,22 @@ val Form = FC<FormProps>("Form") { props ->
     var chosenResponseSize by useState<ResponseSize?>(null)
 
     fun updateState(interactionType: InteractionType, parameter: Parameter, responseSize: ResponseSize) {
-        listOf(ClearQuery, ClearSubscription, ClearMappers).forEach { store.dispatch(it) }
-        val action: Any = when (interactionType) {
-            InteractionType.Rest -> when (responseSize) {
-                is Full -> {
-                    SetQuery(AllQuery())
-                }
-                is Limited -> {
-                    SetQuery(ConcentrationQuery(parameter.toString()))
-                }
-            }
-            is InteractionType.GraphQL -> when (responseSize) {
-                is Full -> {
-                    SetSubscription(AllSubscription())
-                }
-                is Limited -> {
-                    SetSubscription(ConcentrationSubscription(parameter.toString()))
-                }
-            }
+        props.setQuery(null)
+        props.setSubscription(null)
+        when (interactionType) {
+            InteractionType.Rest -> props.setQuery(
+                when (responseSize) {
+                    is Full -> AllQuery()
+                    is Limited -> ConcentrationQuery(parameter.toString())
+                },
+            )
+            is InteractionType.GraphQL -> props.setSubscription(
+                when (responseSize) {
+                    is Full -> AllSubscription()
+                    is Limited -> ConcentrationSubscription(parameter.toString())
+                },
+            )
         }
-        listOf(
-            action,
-            AddMapper(
-                TimeMapper(),
-                AggregateConcentrationMapper(LocalSuccessConcentrationMapper, AggregationStrategy.Max),
-            ),
-        ).forEach { store.dispatch(it) }
     }
 
     fun updateState() {
@@ -97,6 +80,10 @@ val Form = FC<FormProps>("Form") { props ->
 
     useEffect(chosenInteractionType, chosenParameter, chosenResponseSize) {
         updateState()
+    }
+
+    fun onGraphQLController(action: suspend GraphQLController.() -> Unit) {
+        MainScope().launch { action.invoke(props.graphQLController) }
     }
 
     div {
@@ -132,7 +119,8 @@ val Form = FC<FormProps>("Form") { props ->
                 +"Mutations"
             }
             MutationButtons {
-                graphQLController = props.graphQLController
+                play = { onGraphQLController { play() } }
+                pause = { onGraphQLController { pause() } }
             }
         }
     }

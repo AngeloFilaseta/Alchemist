@@ -9,9 +9,7 @@
 
 package it.unibo.alchemist.component.sub
 
-import it.unibo.alchemist.component.props.GraphQLControllerProps
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
+import it.unibo.alchemist.component.props.MutationButtonsProps
 import react.FC
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
@@ -21,27 +19,19 @@ import web.html.ButtonType
 /**
  * Component that renders two buttons to play and pause the simulation.
  */
-val MutationButtons = FC<GraphQLControllerProps>("MutationButtons") { props ->
+val MutationButtons = FC<MutationButtonsProps>("MutationButtons") { props ->
     div {
         button {
             className = ClassName("btn btn-primary")
             type = ButtonType.button
             +"Play"
-            onClick = {
-                MainScope().launch {
-                    props.graphQLController.play()
-                }
-            }
+            onClick = { props.play() }
         }
         button {
             className = ClassName("btn btn-primary")
             type = ButtonType.button
             +"Pause"
-            onClick = {
-                MainScope().launch {
-                    props.graphQLController.pause()
-                }
-            }
+            onClick = { props.pause() }
         }
     }
 }

@@ -9,10 +9,9 @@
 
 package it.unibo.alchemist.component.props
 
-import it.unibo.alchemist.component.props.state.GraphQLControllerProps
-import it.unibo.alchemist.component.props.state.SubscriptionProps
+import react.Props
 
-/**
- * Props for the Info component.
- */
-external interface InfoProps : GraphQLControllerProps, SubscriptionProps
+external interface MutationButtonsProps : Props {
+    var play: () -> Unit
+    var pause: () -> Unit
+}

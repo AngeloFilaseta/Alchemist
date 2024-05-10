@@ -28,9 +28,6 @@ import web.cssom.ClassName
  * Info component.
  */
 val Info = FC("Info") { props: InfoProps ->
-    val clients = props.clients
-    val subscription = props.currentSubscription
-
     div {
         h2 {
             +"Info"
@@ -40,8 +37,9 @@ val Info = FC("Info") { props: InfoProps ->
             +"Current Subscription"
         }
         p {
-            +when (subscription) {
-                is ConcentrationSubscription -> "Retrieving only `${subscription.moleculeName}`"
+            +when (props.subscription) {
+                is ConcentrationSubscription ->
+                    "Retrieving only `${(props.subscription as ConcentrationSubscription).moleculeName}`"
                 is NodesSubscription -> "Retrieving all nodes"
                 else -> "-"
             }
@@ -49,7 +47,7 @@ val Info = FC("Info") { props: InfoProps ->
         h4 {
             +"Connected Clients"
         }
-        if (clients.isNotEmpty()) {
+        if (props.graphQLController.clients.isNotEmpty()) {
             table {
                 className = ClassName("table table-hover")
                 thead {
@@ -61,7 +59,7 @@ val Info = FC("Info") { props: InfoProps ->
                     }
                 }
                 tbody {
-                    clients.forEach {
+                    props.graphQLController.clients.forEach {
                         tr {
                             th {
                                 +it.serverUrl()

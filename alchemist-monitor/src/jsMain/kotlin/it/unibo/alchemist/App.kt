@@ -21,9 +21,12 @@ import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
 import it.unibo.alchemist.logic.GraphRenderer
 import it.unibo.alchemist.logic.RequestAll.queryAll
 import it.unibo.alchemist.logic.RequestAll.subscribeAll
-import it.unibo.alchemist.mapper.data.DataMapper
+import it.unibo.alchemist.mapper.data.AggregateConcentrationMapper
+import it.unibo.alchemist.mapper.data.LocalSuccessConcentrationMapper
+import it.unibo.alchemist.mapper.data.TimeMapper
 import it.unibo.alchemist.monitor.GraphQLController
 import it.unibo.alchemist.state.store
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import react.FC
 import react.Props
@@ -46,37 +49,39 @@ fun main() {
 
 private val App = FC<Props> {
 
-    var controller by useState(GraphQLController.fromClients(emptyList()))
+    var graphQLController by useState(GraphQLController.fromClients(emptyList()))
     var dataframes by useState(emptyMap<GraphQLClient, DataFrame>())
-    var mappers by useState<List<DataMapper<Double>>>(listOf())
+    val mappers by useState(
+        listOf(
+            TimeMapper(),
+            AggregateConcentrationMapper(LocalSuccessConcentrationMapper, AggregationStrategy.Max),
+        ),
+    )
     var subscription by useState<Subscription<*>?>(null)
     var query by useState<Query<*>?>(null)
     var aggregatedDf by useState(AggregatedDataFrame(emptyList(), AggregationStrategy.Average))
     var aggregationStrategy: AggregationStrategy? by useState(null)
 
     store.subscribe {
-        subscription = store.state.currentSubscription
-        query = store.state.currentQuery
-        mappers = store.state.mappers
         dataframes = store.state.dataframes
         aggregationStrategy?.let { strategy ->
             aggregatedDf = AggregatedDataFrame(dataframes.values.toList(), strategy)
         }
     }
 
-    useEffect(controller, subscription) {
+    useEffect(graphQLController, subscription) {
         subscription?.let { s ->
-            launchWithCleanup {
-                subscribeAll(controller, mappers, s)
+            launchWithCleanup(Dispatchers.Default) {
+                subscribeAll(graphQLController, mappers, s)
             }
         }
     }
 
-    useEffect(controller, query) {
+    useEffect(graphQLController, query) {
         query?.let { q ->
-            launchWithCleanup {
+            launchWithCleanup(Dispatchers.Default) {
                 while (true) {
-                    queryAll(controller, mappers, q)
+                    queryAll(graphQLController, mappers, q)
                     delay(1000)
                 }
             }
@@ -89,8 +94,8 @@ private val App = FC<Props> {
 
     Navbar {
         addClient = { address, port ->
-            controller = GraphQLController.fromClients(
-                controller.clients + GraphQLClientFactory.subscriptionClient(address, port),
+            graphQLController = GraphQLController.fromClients(
+                graphQLController.clients + GraphQLClientFactory.subscriptionClient(address, port),
             )
         }
     }
@@ -98,12 +103,14 @@ private val App = FC<Props> {
     div {
         className = ClassName("row")
         Form {
-            graphQLController = controller
-            setAggregationStrategy = { aggregationStrategy = AggregationStrategy.fromString(it) }
+            this.graphQLController = graphQLController
+            this.setAggregationStrategy = { aggregationStrategy = AggregationStrategy.fromString(it) }
+            this.setQuery = { query = it }
+            this.setSubscription = { subscription = it }
         }
         Info {
-            clients = controller.clients
-            currentSubscription = subscription
+            this.graphQLController = graphQLController
+            this.subscription = subscription
         }
     }
 }

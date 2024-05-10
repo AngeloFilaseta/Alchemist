@@ -9,9 +9,15 @@
 
 package it.unibo.alchemist.component.props
 
+import com.apollographql.apollo3.api.Query
+import com.apollographql.apollo3.api.Subscription
+import it.unibo.alchemist.component.props.state.GraphQLControllerProps
+
 /**
  * Props for the Form component.
  */
 external interface FormProps : GraphQLControllerProps {
     var setAggregationStrategy: (String) -> Unit
+    var setQuery: (Query<*>?) -> Unit
+    var setSubscription: (Subscription<*>?) -> Unit
 }

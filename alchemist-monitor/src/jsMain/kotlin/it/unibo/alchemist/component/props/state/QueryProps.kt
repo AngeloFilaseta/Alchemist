@@ -7,11 +7,11 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-package it.unibo.alchemist.component.props
+package it.unibo.alchemist.component.props.state
 
-import it.unibo.alchemist.monitor.GraphQLController
+import com.apollographql.apollo3.api.Query
 import react.Props
 
-external interface GraphQLControllerProps : Props {
-    var graphQLController: GraphQLController
+external interface QueryProps : Props {
+    var query: Query<*>?
 }

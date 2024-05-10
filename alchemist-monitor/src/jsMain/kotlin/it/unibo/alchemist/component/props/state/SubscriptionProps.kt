@@ -7,12 +7,11 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-package it.unibo.alchemist.component.props
+package it.unibo.alchemist.component.props.state
 
-import it.unibo.alchemist.component.props.state.GraphQLControllerProps
-import it.unibo.alchemist.component.props.state.SubscriptionProps
+import com.apollographql.apollo3.api.Subscription
+import react.Props
 
-/**
- * Props for the Info component.
- */
-external interface InfoProps : GraphQLControllerProps, SubscriptionProps
+external interface SubscriptionProps : Props {
+    var subscription: Subscription<*>?
+}
