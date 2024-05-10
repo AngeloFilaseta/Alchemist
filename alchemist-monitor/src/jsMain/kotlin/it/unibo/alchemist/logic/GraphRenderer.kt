@@ -17,6 +17,7 @@ import kotlinx.dom.addClass
 import org.jetbrains.letsPlot.frontend.JsFrontendUtil
 import org.jetbrains.letsPlot.geom.geomLine
 import org.jetbrains.letsPlot.intern.Plot
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLDivElement
 
 /**
@@ -42,20 +43,23 @@ object GraphRenderer {
         }
     }
 
+    private fun Element.generateAndAppendPlotDiv(df: DataFrame, yName: String, caption: String, color: String) {
+        this.appendChild(generatePlotdiv(df, yName, caption, color))
+    }
+
     /**
      * Render the plots in the page.
      * @param map a map of [GraphQLClient] to [DataFrame]
      * @param aggregatedDataFrame the aggregated data frame
      */
     fun renderPlots(map: Map<GraphQLClient, DataFrame>, aggregatedDataFrame: AggregatedDataFrame) {
-        val contentDiv = document.getElementById("plot")
-        contentDiv?.innerHTML = ""
-        map.map { (client, df) -> generatePlotdiv(df, "localSuccess", client.serverUrl(), "red") }.forEach {
-            contentDiv?.appendChild(it)
+        val plotDiv = document.getElementById("plot")
+        plotDiv?.innerHTML = ""
+        map.map { (client, df) ->
+            plotDiv?.generateAndAppendPlotDiv(df, "localSuccess", client.serverUrl(), "red")
         }
         if (aggregatedDataFrame.cols.size > 1) {
-            val aggregateDiv = generatePlotdiv(aggregatedDataFrame, "localSuccess", "AGGREGATE", "blue")
-            contentDiv?.appendChild(aggregateDiv)
+            plotDiv?.generateAndAppendPlotDiv(aggregatedDataFrame, "localSuccess", "AGGREGATE", "blue")
         }
     }
 }

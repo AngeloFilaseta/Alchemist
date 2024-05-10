@@ -11,6 +11,7 @@
 
 package it.unibo.alchemist.dataframe
 
+import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
 import org.jetbrains.letsPlot.intern.Plot
 import org.jetbrains.letsPlot.letsPlot
 
@@ -23,6 +24,14 @@ interface DataFrame {
      * The columns of the data frame.
      */
     val cols: List<Col<*>>
+
+    /**
+     * Retrieve the columns of the data frame.
+     * Each column is limited to the last [limit] elements.
+     */
+    fun cols(limit: Int): List<Col<*>> = cols.map { col ->
+        Col(col.name, col.data.takeLast(limit))
+    }
 
     /**
      * Get a column by name.
@@ -50,7 +59,7 @@ interface DataFrame {
      * Create a [Plot] using the data frame.
      * @return a plot using the data frame.
      */
-    fun toPlot(): Plot = letsPlot(cols.associate { it.name to it.data })
+    fun toPlot(): Plot = letsPlot(cols(1000).associate { it.name to it.data })
 
     companion object {
         /**
@@ -62,6 +71,15 @@ interface DataFrame {
          * Create a data frame from a list of columns.
          */
         fun fromCols(cols: List<Col<Any?>>): DataFrame = DataFrameImpl(cols)
+
+        /**
+         * Create a data frame from a list of columns.
+         * @param dataframes the dataframes to aggregate.
+         * @param strategy the aggregation strategy to use.
+         */
+        fun aggregated(dataframes: List<DataFrame>, strategy: AggregationStrategy): DataFrame {
+            return AggregatedDataFrame(dataframes, strategy)
+        }
     }
 }
 

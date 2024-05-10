@@ -38,14 +38,14 @@ object RequestAll {
         subscriptionController.subscribe(subscription).mapValues { (client, flow) ->
             MainScope().launch {
                 flow.collectLatest { response ->
-                    listOf(
+                    store.dispatch(
                         Collect(
                             client,
                             mappers.map { m ->
                                 m.outputName to m.invoke(response.data as Subscription.Data)
                             },
                         ),
-                    ).forEach { store.dispatch(it) }
+                    )
                 }
             }
         }
@@ -63,9 +63,9 @@ object RequestAll {
         query: Query<*>,
     ) {
         subscriptionController.query(query).mapValues { (client, result) ->
-            listOf(
+            store.dispatch(
                 Collect(client, mappers.map { m -> m.outputName to m.invoke(result.data) }),
-            ).forEach { store.dispatch(it) }
+            )
         }
     }
 }

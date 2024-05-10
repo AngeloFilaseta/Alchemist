@@ -16,12 +16,8 @@ import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.mapper.data.DataMapper
 import it.unibo.alchemist.state.actions.DataFramesAction
 import it.unibo.alchemist.state.actions.MapperAction
-import it.unibo.alchemist.state.actions.QueryAction
-import it.unibo.alchemist.state.actions.SubscriptionAction
 import it.unibo.alchemist.state.reducers.dataFramesReducer
 import it.unibo.alchemist.state.reducers.dataMapperReducer
-import it.unibo.alchemist.state.reducers.queryReducer
-import it.unibo.alchemist.state.reducers.subscriptionReducer
 
 /**
  * State of the monitor component.
@@ -43,12 +39,6 @@ data class State(
  * @param action the action to be applied.
  */
 fun rootReducer(state: State, action: Any): State = when (action) {
-    is SubscriptionAction -> state.copy(
-        currentSubscription = subscriptionReducer(action),
-    )
-    is QueryAction -> state.copy(
-        currentQuery = queryReducer(action),
-    )
     is MapperAction -> state.copy(
         mappers = dataMapperReducer(state.mappers, action),
     )

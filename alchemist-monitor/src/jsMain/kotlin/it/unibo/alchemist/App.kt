@@ -28,14 +28,18 @@ import it.unibo.alchemist.monitor.GraphQLController
 import it.unibo.alchemist.state.store
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
 import react.FC
 import react.Props
 import react.create
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
 import react.useEffect
+import react.useEffectOnce
 import react.useState
 import web.cssom.ClassName
+import web.timers.setInterval
+import kotlin.time.Duration
 import web.dom.document as webDomDocument
 
 /**
@@ -71,7 +75,7 @@ private val App = FC<Props> {
 
     useEffect(graphQLController, subscription) {
         subscription?.let { s ->
-            launchWithCleanup(Dispatchers.Default) {
+            launchWithCleanup(Dispatchers.Main) {
                 subscribeAll(graphQLController, mappers, s)
             }
         }
@@ -79,7 +83,7 @@ private val App = FC<Props> {
 
     useEffect(graphQLController, query) {
         query?.let { q ->
-            launchWithCleanup(Dispatchers.Default) {
+            launchWithCleanup(Dispatchers.Main) {
                 while (true) {
                     queryAll(graphQLController, mappers, q)
                     delay(1000)
@@ -88,8 +92,17 @@ private val App = FC<Props> {
         }
     }
 
-    useEffect(listOf(dataframes, aggregatedDf)) {
-        GraphRenderer.renderPlots(dataframes, aggregatedDf)
+    useEffect(dataframes, aggregatedDf) {
+        launchWithCleanup(Dispatchers.Main) {
+            val time = Clock.System.now().toEpochMilliseconds()
+            GraphRenderer.renderPlots(dataframes, aggregatedDf)
+            console.log(Clock.System.now().toEpochMilliseconds() - time)
+        }
+    }
+
+    useEffectOnce {
+        setInterval(Duration.parse("1s")) {
+        }
     }
 
     Navbar {
