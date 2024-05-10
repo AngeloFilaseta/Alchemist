@@ -9,15 +9,10 @@
 
 package it.unibo.alchemist.logic
 
-import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
-import it.unibo.alchemist.dataframe.AggregatedDataFrame
-import it.unibo.alchemist.dataframe.DataFrame
 import kotlinx.browser.document
 import kotlinx.dom.addClass
 import org.jetbrains.letsPlot.frontend.JsFrontendUtil
-import org.jetbrains.letsPlot.geom.geomLine
 import org.jetbrains.letsPlot.intern.Plot
-import org.w3c.dom.Element
 import org.w3c.dom.HTMLDivElement
 
 /**
@@ -25,41 +20,33 @@ import org.w3c.dom.HTMLDivElement
  */
 object GraphRenderer {
 
-    private fun generatePlot(df: DataFrame, yName: String, color: String): Plot {
-        return df.toPlot() + geomLine(color = color) {
-            x = "time"
-            y = yName
-        }
-    }
+    /**
+     * The limit of the columns to render.
+     */
+    const val RENDER_COL_SIZE_LIMIT = 1000
 
-    private fun generatePlotdiv(df: DataFrame, yName: String, caption: String, color: String): HTMLDivElement {
-        return JsFrontendUtil.createPlotDiv(generatePlot(df, yName, color)).apply {
+    private fun buildPlotDiv(plot: Plot, caption: String? = null): HTMLDivElement {
+        return JsFrontendUtil.createPlotDiv(plot).apply {
             addClass("col-4")
-            appendChild(
-                document.createElement("p").apply {
-                    innerHTML = caption
-                },
-            )
+            caption?.let {
+                appendChild(
+                    document.createElement("p").apply {
+                        innerHTML = caption
+                    },
+                )
+            }
         }
-    }
-
-    private fun Element.generateAndAppendPlotDiv(df: DataFrame, yName: String, caption: String, color: String) {
-        this.appendChild(generatePlotdiv(df, yName, caption, color))
     }
 
     /**
      * Render the plots in the page.
-     * @param map a map of [GraphQLClient] to [DataFrame]
-     * @param aggregatedDataFrame the aggregated data frame
+     * @param map a map of caption to [Plot]s.
      */
-    fun renderPlots(map: Map<GraphQLClient, DataFrame>, aggregatedDataFrame: AggregatedDataFrame) {
+    fun renderPlots(map: Map<String, Plot>) {
         val plotDiv = document.getElementById("plot")
         plotDiv?.innerHTML = ""
-        map.map { (client, df) ->
-            plotDiv?.generateAndAppendPlotDiv(df, "localSuccess", client.serverUrl(), "red")
-        }
-        if (aggregatedDataFrame.cols.size > 1) {
-            plotDiv?.generateAndAppendPlotDiv(aggregatedDataFrame, "localSuccess", "AGGREGATE", "blue")
+        map.map { (caption, plot) ->
+            plotDiv?.appendChild(buildPlotDiv(plot, caption))
         }
     }
 }

@@ -17,7 +17,7 @@ import kotlin.math.abs
  * A DataFrame that aggregates multiple dataframes.
  * @param allDataFrames the list of dataframes to aggregate.
  */
-data class AggregatedDataFrame(
+data class AggregatedDataFrame internal constructor(
     private val allDataFrames: List<DataFrame>,
     private val aggregationStrategy: AggregationStrategy,
 ) : DataFrame {

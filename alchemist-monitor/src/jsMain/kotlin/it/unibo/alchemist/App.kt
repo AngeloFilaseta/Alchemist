@@ -15,10 +15,10 @@ import it.unibo.alchemist.boundary.graphql.client.GraphQLClientFactory
 import it.unibo.alchemist.component.Form
 import it.unibo.alchemist.component.Info
 import it.unibo.alchemist.component.Navbar
-import it.unibo.alchemist.dataframe.AggregatedDataFrame
 import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
 import it.unibo.alchemist.logic.GraphRenderer
+import it.unibo.alchemist.logic.GraphRenderer.RENDER_COL_SIZE_LIMIT
 import it.unibo.alchemist.logic.RequestAll.queryAll
 import it.unibo.alchemist.logic.RequestAll.subscribeAll
 import it.unibo.alchemist.mapper.data.AggregateConcentrationMapper
@@ -63,14 +63,10 @@ private val App = FC<Props> {
     )
     var subscription by useState<Subscription<*>?>(null)
     var query by useState<Query<*>?>(null)
-    var aggregatedDf by useState(AggregatedDataFrame(emptyList(), AggregationStrategy.Average))
     var aggregationStrategy: AggregationStrategy? by useState(null)
 
     store.subscribe {
         dataframes = store.state.dataframes
-        aggregationStrategy?.let { strategy ->
-            aggregatedDf = AggregatedDataFrame(dataframes.values.toList(), strategy)
-        }
     }
 
     useEffect(graphQLController, subscription) {
@@ -92,10 +88,26 @@ private val App = FC<Props> {
         }
     }
 
-    useEffect(dataframes, aggregatedDf) {
+    useEffect(dataframes) {
         launchWithCleanup(Dispatchers.Main) {
             val time = Clock.System.now().toEpochMilliseconds()
-            GraphRenderer.renderPlots(dataframes, aggregatedDf)
+            val aggregatedDf = aggregationStrategy?.let { strategy ->
+                DataFrame.aggregated(
+                    dataframes.values.map { df ->
+                        DataFrame.fromCols(df.cols(RENDER_COL_SIZE_LIMIT))
+                    },
+                    strategy,
+                )
+            }
+            val plots = dataframes.mapKeys { (client, _) ->
+                client.serverUrl()
+            }.mapValues { (_, df) ->
+                df.toPlot("localSuccess", "green", RENDER_COL_SIZE_LIMIT)
+            }
+            val allPlots = aggregatedDf?.let {
+                plots + ("Aggregated" to aggregatedDf.toPlot("localSuccess", "red", RENDER_COL_SIZE_LIMIT))
+            } ?: plots
+            GraphRenderer.renderPlots(allPlots)
             console.log(Clock.System.now().toEpochMilliseconds() - time)
         }
     }

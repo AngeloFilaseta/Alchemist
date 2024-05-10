@@ -12,6 +12,7 @@
 package it.unibo.alchemist.dataframe
 
 import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
+import org.jetbrains.letsPlot.geom.geomLine
 import org.jetbrains.letsPlot.intern.Plot
 import org.jetbrains.letsPlot.letsPlot
 
@@ -57,9 +58,14 @@ interface DataFrame {
 
     /**
      * Create a [Plot] using the data frame.
+     * @param limit the max number of elements for each column.
      * @return a plot using the data frame.
      */
-    fun toPlot(): Plot = letsPlot(cols(1000).associate { it.name to it.data })
+    fun toPlot(yName: String, color: String, limit: Int): Plot =
+        letsPlot(cols(limit).associate { it.name to it.data }) + geomLine(color = color) {
+            x = "time"
+            y = yName
+        }
 
     companion object {
         /**
@@ -69,15 +75,16 @@ interface DataFrame {
 
         /**
          * Create a data frame from a list of columns.
+         * @param cols the columns of the data frame.
          */
-        fun fromCols(cols: List<Col<Any?>>): DataFrame = DataFrameImpl(cols)
+        fun fromCols(cols: List<Col<*>>): DataFrame = DataFrameImpl(cols)
 
         /**
          * Create a data frame from a list of columns.
          * @param dataframes the dataframes to aggregate.
          * @param strategy the aggregation strategy to use.
          */
-        fun aggregated(dataframes: List<DataFrame>, strategy: AggregationStrategy): DataFrame {
+        fun aggregated(dataframes: List<DataFrame>, strategy: AggregationStrategy): AggregatedDataFrame {
             return AggregatedDataFrame(dataframes, strategy)
         }
     }
