@@ -15,13 +15,11 @@ import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.mapper.data.DataMapper
 import it.unibo.alchemist.state.actions.DataFramesAction
-import it.unibo.alchemist.state.actions.EvaluationAction
 import it.unibo.alchemist.state.actions.MapperAction
 import it.unibo.alchemist.state.actions.QueryAction
 import it.unibo.alchemist.state.actions.SubscriptionAction
 import it.unibo.alchemist.state.reducers.dataFramesReducer
 import it.unibo.alchemist.state.reducers.dataMapperReducer
-import it.unibo.alchemist.state.reducers.evaluationReducer
 import it.unibo.alchemist.state.reducers.queryReducer
 import it.unibo.alchemist.state.reducers.subscriptionReducer
 
@@ -31,14 +29,12 @@ import it.unibo.alchemist.state.reducers.subscriptionReducer
  * @param currentSubscription the current subscription.
  * @param currentQuery the current query.
  * @param mappers the list of [DataMapper]s.
- * @param evaluationDf the dataframe used for evaluation.
  */
 data class State(
     val currentSubscription: Subscription<*>? = null,
     val currentQuery: Query<*>? = null,
     val mappers: List<DataMapper<Double>> = listOf(),
     val dataframes: Map<GraphQLClient, DataFrame> = emptyMap(),
-    val evaluationDf: DataFrame = DataFrame.empty(),
 )
 
 /**
@@ -58,9 +54,6 @@ fun rootReducer(state: State, action: Any): State = when (action) {
     )
     is DataFramesAction -> state.copy(
         dataframes = dataFramesReducer(state.dataframes, action),
-    )
-    is EvaluationAction -> state.copy(
-        evaluationDf = evaluationReducer(state.evaluationDf, action),
     )
     else -> state
 }

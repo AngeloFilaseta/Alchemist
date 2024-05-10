@@ -23,7 +23,6 @@ import it.unibo.alchemist.logic.RequestAll.queryAll
 import it.unibo.alchemist.logic.RequestAll.subscribeAll
 import it.unibo.alchemist.mapper.data.DataMapper
 import it.unibo.alchemist.monitor.GraphQLController
-import it.unibo.alchemist.state.actions.ResetEvaluation
 import it.unibo.alchemist.state.store
 import kotlinx.coroutines.delay
 import react.FC
@@ -63,10 +62,6 @@ private val App = FC<Props> {
         aggregationStrategy?.let { strategy ->
             aggregatedDf = AggregatedDataFrame(dataframes.values.toList(), strategy)
         }
-    }
-
-    useEffect(subscription, query) {
-        store.dispatch(ResetEvaluation)
     }
 
     useEffect(controller, subscription) {
