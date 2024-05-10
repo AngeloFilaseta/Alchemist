@@ -18,6 +18,8 @@ import it.unibo.alchemist.boundary.graphql.client.AllQuery
 import it.unibo.alchemist.boundary.graphql.client.AllSubscription
 import it.unibo.alchemist.boundary.graphql.client.ConcentrationQuery
 import it.unibo.alchemist.boundary.graphql.client.ConcentrationSubscription
+import it.unibo.alchemist.component.props.FormProps
+import it.unibo.alchemist.component.sub.FormElement
 import it.unibo.alchemist.component.sub.MutationButtons
 import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
 import it.unibo.alchemist.mapper.data.AggregateConcentrationMapper
@@ -31,8 +33,6 @@ import it.unibo.alchemist.state.actions.SetQuery
 import it.unibo.alchemist.state.actions.SetSubscription
 import it.unibo.alchemist.state.store
 import react.FC
-import react.Props
-import react.dom.html.ReactHTML
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h2
 import react.dom.html.ReactHTML.h4
@@ -43,11 +43,14 @@ import web.cssom.ClassName
 /**
  * Form component.
  */
-val Form = FC<Props>("Form") {
+val Form = FC<FormProps>("Form") { props ->
 
     val interactiontypes by useState(listOf(InteractionType.Rest, InteractionType.GraphQL))
     val parameters by useState(listOf(Parameter.LocalSuccess))
     val responseSize by useState(listOf(Limited, Full))
+    val aggregationStrategy by useState(
+        listOf(AggregationStrategy.Sum, AggregationStrategy.Average, AggregationStrategy.Max, AggregationStrategy.Min),
+    )
 
     var chosenInteractionType by useState<InteractionType?>(null)
     var chosenParameter by useState<Parameter?>(null)
@@ -104,78 +107,26 @@ val Form = FC<Props>("Form") {
         div {
             className = ClassName("row")
             // TYPE
-            h4 {
-                +"Interaction Type"
+            FormElement {
+                title = "Interaction Type"
+                elements = interactiontypes.map { it.toString() }
+                valueChangeHandler = { chosenInteractionType = InteractionType.fromString(it) }
             }
-            ReactHTML.select {
-                onChange = { event ->
-                    event.target.value.let {
-                        chosenInteractionType = InteractionType.fromString(it)
-                    }
-                }
-                className = ClassName("form-select")
-                ReactHTML.option {
-                    value = null
-                    selected = true
-                    +"Select the interaction type:"
-                }
-                interactiontypes.forEach { p ->
-                    ReactHTML.option {
-                        +p.toString()
-                        value = p
-                    }
-                }
+            FormElement {
+                title = "Parameter"
+                elements = parameters.map { it.toString() }
+                valueChangeHandler = { chosenParameter = Parameter.fromString(it) }
             }
 
-            // PARAMETER
-            h4 {
-                +"Parameters"
+            FormElement {
+                title = "Response Size"
+                elements = responseSize.map { it.toString() }
+                valueChangeHandler = { chosenResponseSize = ResponseSize.fromString(it) }
             }
-            ReactHTML.select {
-                onChange = { event ->
-                    event.target.value.let {
-                        chosenParameter = Parameter.fromString(it)
-                    }
-                }
-                className = ClassName("form-select")
-                ReactHTML.option {
-                    value = null
-                    selected = true
-                    +"Select the parameter(s) to observe:"
-                }
-                parameters.forEach { p ->
-                    ReactHTML.option {
-                        +p.toString()
-                        value = p
-                    }
-                }
-            }
-
-            // SUBSCRIPTION SIZE
-            h4 {
-                +"Subscription size"
-            }
-            div {
-                className = ClassName("col-sm-10")
-                ReactHTML.select {
-                    onChange = { event ->
-                        event.target.value.let {
-                            chosenResponseSize = ResponseSize.fromString(it)
-                        }
-                    }
-                    className = ClassName("form-select")
-                    ReactHTML.option {
-                        value = null
-                        selected = true
-                        +"Select a subscription size:"
-                    }
-                    responseSize.forEach { s ->
-                        ReactHTML.option {
-                            +s.toString()
-                            value = s
-                        }
-                    }
-                }
+            FormElement {
+                title = "Aggregation Strategy"
+                elements = aggregationStrategy.map { it.toString() }
+                valueChangeHandler = { props.setAggregationStrategy(it) }
             }
             h4 {
                 +"Mutations"

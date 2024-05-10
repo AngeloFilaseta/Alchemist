@@ -25,6 +25,10 @@ sealed interface AggregationStrategy {
      */
     data object Average : AggregationStrategy {
         override fun aggregate(values: List<Number>): Double = Sum.aggregate(values) / values.size.toDouble()
+
+        override fun toString(): String {
+            return "Average"
+        }
     }
 
     /**
@@ -34,6 +38,10 @@ sealed interface AggregationStrategy {
         override fun aggregate(values: List<Number>): Double = values.reduce { a, b ->
             a.toDouble() + b.toDouble()
         }.toDouble()
+
+        override fun toString(): String {
+            return "Sum"
+        }
     }
 
     /**
@@ -41,6 +49,10 @@ sealed interface AggregationStrategy {
      */
     data object Max : AggregationStrategy {
         override fun aggregate(values: List<Number>): Double = values.maxOfOrNull { it.toDouble() } ?: Double.NaN
+
+        override fun toString(): String {
+            return "Max"
+        }
     }
 
     /**
@@ -48,5 +60,24 @@ sealed interface AggregationStrategy {
      */
     data object Min : AggregationStrategy {
         override fun aggregate(values: List<Number>): Double = values.minOfOrNull { it.toDouble() } ?: Double.NaN
+
+        override fun toString(): String {
+            return "Min"
+        }
+    }
+
+    companion object {
+        /**
+         * Get an [AggregationStrategy] from a string.
+         * @param name the name of the strategy.
+         * @return the strategy.
+         */
+        fun fromString(name: String): AggregationStrategy? = when (name) {
+            Average.toString() -> Average
+            Sum.toString() -> Sum
+            Max.toString() -> Max
+            Min.toString() -> Min
+            else -> null
+        }
     }
 }

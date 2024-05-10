@@ -34,8 +34,8 @@ data class AggregatedDataFrame(
      * The elements are the minimum time in all times, the second is the maximum time in all times,
      * and the third is the average number of time points in all dataframes.
      */
-    private fun suggestedRangeWithStep(): Triple<Double, Double, Int> {
-        val allTimeData = dataFrames.map { dataframe ->
+    private fun suggestedRangeWithStep(dfs: List<DataFrame>): Triple<Double, Double, Int> {
+        val allTimeData = dfs.map { dataframe ->
             dataframe.cols.filter { col -> col.name == Col.TIME_NAME }.flatMap { col -> col.data }
         }
         val allTime = allTimeData.flatten() as List<Double>
@@ -48,7 +48,7 @@ data class AggregatedDataFrame(
 
     private fun generateCols(): List<Col<*>> {
         // new time col
-        val timeCol = suggestedRangeWithStep().let { (start, stop, num) ->
+        val timeCol = suggestedRangeWithStep(dataFrames).let { (start, stop, num) ->
             Col(Col.TIME_NAME, linspace(start, stop, num))
         }
         // all columns mapped to the new values of th

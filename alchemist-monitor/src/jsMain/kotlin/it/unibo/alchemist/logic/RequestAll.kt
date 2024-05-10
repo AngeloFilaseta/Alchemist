@@ -16,6 +16,7 @@ import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import it.unibo.alchemist.state.actions.Collect
 import it.unibo.alchemist.state.store
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -36,7 +37,7 @@ object RequestAll {
     ) {
         subscriptionController.subscribe(subscription).mapValues { (client, flow) ->
             MainScope().launch {
-                flow.collect { response ->
+                flow.collectLatest { response ->
                     listOf(
                         Collect(
                             client,

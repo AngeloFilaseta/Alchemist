@@ -53,7 +53,7 @@ object GraphRenderer {
         map.map { (client, df) -> generatePlotdiv(df, "localSuccess", client.serverUrl(), "red") }.forEach {
             contentDiv?.appendChild(it)
         }
-        if (aggregatedDataFrame.cols.isNotEmpty()) {
+        if (aggregatedDataFrame.cols.size > 1) {
             val aggregateDiv = generatePlotdiv(aggregatedDataFrame, "localSuccess", "AGGREGATE", "blue")
             contentDiv?.appendChild(aggregateDiv)
         }

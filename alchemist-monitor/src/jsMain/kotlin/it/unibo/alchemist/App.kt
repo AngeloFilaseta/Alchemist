@@ -53,6 +53,7 @@ private val App = FC<Props> {
     var subscription by useState<Subscription<*>?>(null)
     var query by useState<Query<*>?>(null)
     var aggregatedDf by useState(AggregatedDataFrame(emptyList(), AggregationStrategy.Average))
+    var aggregationStrategy: AggregationStrategy? by useState(null)
 
     store.subscribe {
         subscriptionController = store.state.subscriptionController
@@ -60,7 +61,9 @@ private val App = FC<Props> {
         query = store.state.currentQuery
         mappers = store.state.mappers
         dataframes = store.state.dataframes
-        aggregatedDf = AggregatedDataFrame(dataframes.values.toList(), AggregationStrategy.Average)
+        aggregationStrategy?.let { strategy ->
+            aggregatedDf = AggregatedDataFrame(dataframes.values.toList(), strategy)
+        }
     }
 
     useEffect(subscription, query) {
@@ -93,7 +96,9 @@ private val App = FC<Props> {
     Navbar()
     div {
         className = ClassName("row")
-        Form()
+        Form {
+            setAggregationStrategy = { aggregationStrategy = AggregationStrategy.fromString(it) }
+        }
         Info {
             clients = subscriptionController.clients
             currentSubscription = subscription
