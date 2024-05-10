@@ -35,11 +35,8 @@ import react.create
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.div
 import react.useEffect
-import react.useEffectOnce
 import react.useState
 import web.cssom.ClassName
-import web.timers.setInterval
-import kotlin.time.Duration
 import web.dom.document as webDomDocument
 
 /**
@@ -109,11 +106,6 @@ private val App = FC<Props> {
             } ?: plots
             GraphRenderer.renderPlots(allPlots)
             console.log(Clock.System.now().toEpochMilliseconds() - time)
-        }
-    }
-
-    useEffectOnce {
-        setInterval(Duration.parse("1s")) {
         }
     }
 
