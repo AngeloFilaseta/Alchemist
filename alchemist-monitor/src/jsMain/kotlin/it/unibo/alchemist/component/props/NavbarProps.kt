@@ -9,9 +9,8 @@
 
 package it.unibo.alchemist.component.props
 
-/**
- * Props for the Form component.
- */
-external interface FormProps : GraphQLControllerProps {
-    var setAggregationStrategy: (String) -> Unit
+import react.Props
+
+external interface NavbarProps : Props {
+    var addClient: (String, Int) -> Unit
 }

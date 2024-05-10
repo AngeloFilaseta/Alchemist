@@ -7,11 +7,14 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-package it.unibo.alchemist.component.props
+package it.unibo.alchemist.monitor.impl
+
+import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
+import it.unibo.alchemist.monitor.GraphQLController
 
 /**
- * Props for the Form component.
+ * Implementation of [GraphQLController].
  */
-external interface FormProps : GraphQLControllerProps {
-    var setAggregationStrategy: (String) -> Unit
-}
+internal data class GraphQLControllerImpl(
+    override val clients: List<GraphQLClient>,
+) : GraphQLController

@@ -16,13 +16,13 @@ import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.boundary.graphql.client.PauseSimulationMutation
 import it.unibo.alchemist.boundary.graphql.client.PlaySimulationMutation
-import it.unibo.alchemist.monitor.impl.GraphQLSubscriptionControllerImpl
+import it.unibo.alchemist.monitor.impl.GraphQLControllerImpl
 import kotlinx.coroutines.flow.Flow
 
 /**
  * Handle the subscription to the Alchemist subscription clients.
  */
-interface GraphQLSubscriptionController {
+interface GraphQLController {
 
     /**
      * The list of clients to be managed.
@@ -79,7 +79,7 @@ interface GraphQLSubscriptionController {
          * Create a new instance from a list of clients.
          * @param clients the list of clients.
          */
-        fun fromClients(clients: List<GraphQLClient>): GraphQLSubscriptionController =
-            GraphQLSubscriptionControllerImpl(clients)
+        fun fromClients(clients: List<GraphQLClient>): GraphQLController =
+            GraphQLControllerImpl(clients)
     }
 }

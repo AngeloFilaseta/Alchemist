@@ -12,7 +12,7 @@ package it.unibo.alchemist.logic
 import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.mapper.data.DataMapper
-import it.unibo.alchemist.monitor.GraphQLSubscriptionController
+import it.unibo.alchemist.monitor.GraphQLController
 import it.unibo.alchemist.state.actions.Collect
 import it.unibo.alchemist.state.store
 import kotlinx.coroutines.MainScope
@@ -31,7 +31,7 @@ object RequestAll {
      * @param subscription the subscription to subscribe to.
      */
     suspend fun subscribeAll(
-        subscriptionController: GraphQLSubscriptionController,
+        subscriptionController: GraphQLController,
         mappers: List<DataMapper<*>>,
         subscription: Subscription<*>,
     ) {
@@ -58,7 +58,7 @@ object RequestAll {
      * @param query the query to execute.
      */
     suspend fun queryAll(
-        subscriptionController: GraphQLSubscriptionController,
+        subscriptionController: GraphQLController,
         mappers: List<DataMapper<*>>,
         query: Query<*>,
     ) {

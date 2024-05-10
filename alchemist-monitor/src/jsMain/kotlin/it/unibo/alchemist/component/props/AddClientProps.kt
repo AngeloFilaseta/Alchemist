@@ -7,14 +7,10 @@
  * as described in the file LICENSE in the Alchemist distribution's top directory.
  */
 
-package it.unibo.alchemist.monitor.impl
+package it.unibo.alchemist.component.props
 
-import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
-import it.unibo.alchemist.monitor.GraphQLSubscriptionController
+import react.Props
 
-/**
- * Implementation of [GraphQLSubscriptionController].
- */
-internal data class GraphQLSubscriptionControllerImpl(
-    override val clients: List<GraphQLClient>,
-) : GraphQLSubscriptionController
+external interface AddClientProps : Props {
+    var addClient: (String, Int) -> Unit
+}

@@ -9,9 +9,9 @@
 
 package it.unibo.alchemist.component
 
+import it.unibo.alchemist.component.props.NavbarProps
 import it.unibo.alchemist.component.sub.AddSubscriptionClientForm
 import react.FC
-import react.Props
 import react.dom.html.ReactHTML.a
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.nav
@@ -20,7 +20,7 @@ import web.cssom.ClassName
 /**
  * Navbar component.
  */
-val Navbar = FC<Props>("MutationButtons") {
+val Navbar = FC<NavbarProps>("MutationButtons") { props ->
     nav {
         className = ClassName("navbar navbar-expand-lg bg-primary")
         a {
@@ -29,7 +29,9 @@ val Navbar = FC<Props>("MutationButtons") {
         }
         div {
             className = ClassName("collapse navbar-collapse")
-            AddSubscriptionClientForm()
+            AddSubscriptionClientForm {
+                addClient = props.addClient
+            }
         }
     }
 }

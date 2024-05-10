@@ -9,11 +9,8 @@
 
 package it.unibo.alchemist.component.sub
 
-import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
-import it.unibo.alchemist.state.actions.AddSubscripionClient
-import it.unibo.alchemist.state.store
+import it.unibo.alchemist.component.props.AddClientProps
 import react.FC
-import react.Props
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.input
 import react.useState
@@ -22,13 +19,8 @@ import web.cssom.ClassName
 /**
  * Component that renders a form suitable for adding subscription clients.
  */
-val AddSubscriptionClientForm = FC<Props>("AddSubscriptionClientForm") {
-    var clients by useState(listOf<GraphQLClient>())
+val AddSubscriptionClientForm = FC<AddClientProps>("AddSubscriptionClientForm") { props ->
     var inputText by useState("")
-
-    store.subscribe {
-        clients = store.state.subscriptionController.clients
-    }
 
     input {
         className = ClassName("form-control me-sm-2")
@@ -43,7 +35,7 @@ val AddSubscriptionClientForm = FC<Props>("AddSubscriptionClientForm") {
         onClick = {
             val port = inputText.split(":").last()
             val address = inputText.removeSuffix(":$port")
-            store.dispatch(AddSubscripionClient(address, port.toInt()))
+            props.addClient(address, port.toInt())
             inputText = ""
         }
         +"Add client"

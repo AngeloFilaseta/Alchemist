@@ -14,23 +14,19 @@ import com.apollographql.apollo3.api.Subscription
 import it.unibo.alchemist.boundary.graphql.client.GraphQLClient
 import it.unibo.alchemist.dataframe.DataFrame
 import it.unibo.alchemist.mapper.data.DataMapper
-import it.unibo.alchemist.monitor.GraphQLSubscriptionController
 import it.unibo.alchemist.state.actions.DataFramesAction
 import it.unibo.alchemist.state.actions.EvaluationAction
 import it.unibo.alchemist.state.actions.MapperAction
 import it.unibo.alchemist.state.actions.QueryAction
 import it.unibo.alchemist.state.actions.SubscriptionAction
-import it.unibo.alchemist.state.actions.SubscriptionControllerAction
 import it.unibo.alchemist.state.reducers.dataFramesReducer
 import it.unibo.alchemist.state.reducers.dataMapperReducer
 import it.unibo.alchemist.state.reducers.evaluationReducer
 import it.unibo.alchemist.state.reducers.queryReducer
-import it.unibo.alchemist.state.reducers.subscriptionManagerReducer
 import it.unibo.alchemist.state.reducers.subscriptionReducer
 
 /**
  * State of the monitor component.
- * @param subscriptionController the [GraphQLSubscriptionController] that manages the subscriptions.
  * @param dataframes the dataframes associated with each [Subscription] to each [GraphQLClient].
  * @param currentSubscription the current subscription.
  * @param currentQuery the current query.
@@ -38,8 +34,6 @@ import it.unibo.alchemist.state.reducers.subscriptionReducer
  * @param evaluationDf the dataframe used for evaluation.
  */
 data class State(
-    val subscriptionController: GraphQLSubscriptionController =
-        GraphQLSubscriptionController.fromClients(emptyList()),
     val currentSubscription: Subscription<*>? = null,
     val currentQuery: Query<*>? = null,
     val mappers: List<DataMapper<Double>> = listOf(),
@@ -53,9 +47,6 @@ data class State(
  * @param action the action to be applied.
  */
 fun rootReducer(state: State, action: Any): State = when (action) {
-    is SubscriptionControllerAction -> state.copy(
-        subscriptionController = subscriptionManagerReducer(state.subscriptionController, action),
-    )
     is SubscriptionAction -> state.copy(
         currentSubscription = subscriptionReducer(action),
     )

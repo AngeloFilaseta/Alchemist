@@ -131,7 +131,9 @@ val Form = FC<FormProps>("Form") { props ->
             h4 {
                 +"Mutations"
             }
-            MutationButtons()
+            MutationButtons {
+                graphQLController = props.graphQLController
+            }
         }
     }
 }
