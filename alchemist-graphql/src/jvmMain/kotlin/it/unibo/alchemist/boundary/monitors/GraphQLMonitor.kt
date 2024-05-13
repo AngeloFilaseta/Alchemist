@@ -42,6 +42,13 @@ class GraphQLMonitor<T, P : Position<out P>> @JvmOverloads constructor(
     private val serverDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : OutputMonitor<Any, Nothing> {
 
+    @JvmOverloads constructor(
+        environment: Environment<T, P>,
+        port: Int,
+        teardownOnSimulationTermination: Boolean = true,
+        serverDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    ) : this(environment, DefaultGraphQLSettings.DEFAULT_HOST, port, teardownOnSimulationTermination, serverDispatcher)
+
     private val subscriptionMonitor = EnvironmentSubscriptionMonitor<Any, Nothing>()
     private lateinit var server: ApplicationEngine
 
