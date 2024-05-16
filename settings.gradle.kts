@@ -41,7 +41,7 @@ include(
     "alchemist-ui-tooling",
     "alchemist-swingui",
     "alchemist-web-renderer",
-    "vmc-experiments",
+    "ds-rt-experiments",
 )
 rootProject.name = "alchemist"
 
