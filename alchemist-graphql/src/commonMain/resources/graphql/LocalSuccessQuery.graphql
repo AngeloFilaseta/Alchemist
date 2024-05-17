@@ -1,0 +1,10 @@
+query LocalSuccessQuery {
+    simulation {
+        time
+        environment {
+            nodes{
+              getConcentration(molecule: { name: "localSuccess" } )
+            }
+        }
+    }
+}

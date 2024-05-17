@@ -98,9 +98,7 @@ monitors:
 export:
   - type: CSVExporter
     parameters:
-      fileNameRoot: "size"
-      exportPath: "/home/angelo/Desktop/simulations/RESULTS"
-      interval: 0.2
+      fileNameRoot: "/home/angelo/Desktop/simulations/RESULTS"
+      interval: 3.0
     data:
-      - type: LitimedAndFullResponseExtractor
-        parameters: [*port]
+      - type: it.unibo.alchemist.server.extractors.DSRTEvalExtractor

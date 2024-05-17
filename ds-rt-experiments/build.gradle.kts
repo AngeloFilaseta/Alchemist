@@ -149,7 +149,7 @@ File(project.projectDir.path + "/src/main/yaml").listFiles()
                    host: 127.0.0.1
                    port: 9090
                    batch: [seed]
-                   autoStart: false
+                   autoStart: true
                 """.trimIndent(),
 
             )

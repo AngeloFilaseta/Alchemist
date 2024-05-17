@@ -11,14 +11,14 @@ package it.unibo.alchemist.extractor
 
 import it.unibo.alchemist.boundary.Extractor
 import it.unibo.alchemist.boundary.graphql.client.AllQuery
-import it.unibo.alchemist.boundary.graphql.client.ConcentrationQuery
+import it.unibo.alchemist.boundary.graphql.client.LocalSuccessQuery
 import it.unibo.alchemist.model.Actionable
 import it.unibo.alchemist.model.Environment
 import it.unibo.alchemist.model.Time
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-class LitimedAndFullResponseExtractor(private val address: String) : Extractor<Double> {
+class LitimedAndFullResponseExtractor(private val port: Int) : Extractor<Double> {
 
     override val columnNames: List<String>
         get() = listOf("simulation_time", "nodes", "limited_size", "full_size")
@@ -30,11 +30,14 @@ class LitimedAndFullResponseExtractor(private val address: String) : Extractor<D
         step: Long,
     ): Map<String, Double> {
         environment.simulation.pause()
-        val sizes = listOf(ConcentrationQuery("localSuccess"), AllQuery()).map { query ->
+        val sizes = listOf(
+            LocalSuccessQuery.OPERATION_DOCUMENT,
+            AllQuery.OPERATION_DOCUMENT,
+        ).map { query ->
             OkHttpClient()
                 .newCall(
                     Request.Builder()
-                        .url(getRequest(address, query.toString()))
+                        .url(getRequest(port, query))
                         .build(),
                 )
                 .execute()
@@ -51,5 +54,5 @@ class LitimedAndFullResponseExtractor(private val address: String) : Extractor<D
         ).toMap()
     }
 
-    private fun getRequest(address: String, query: String) = "$address/graphql?query=$query"
+    private fun getRequest(port: Int, query: String) = "http://localhost:$port/graphql?query=$query"
 }
