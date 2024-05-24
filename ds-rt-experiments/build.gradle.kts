@@ -140,20 +140,7 @@ File(project.projectDir.path + "/src/main/yaml").listFiles()
             description = "Launches batch experiments for $capitalizedName"
             maxHeapSize = "${minOf(heap.toInt(), Runtime.getRuntime().availableProcessors() * taskSize)}m"
             File("data").mkdirs()
-            args(
-                "--override",
-                """
-                launcher:
-                  type:
-                    MonitorLauncher
-                  parameters:
-                    host: 127.0.0.1
-                    port: 9090
-                    batch: [seed]
-                    autoStart: false
-                """.trimIndent(),
-
-            )
+            args()
         }
         runAllBatch.dependsOn(batch)
     }
