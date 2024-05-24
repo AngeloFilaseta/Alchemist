@@ -119,3 +119,7 @@ launcher:
     parameters:
       batch: [frequency, averageResponseCreationTime, jitter]
       autoStart: true
+
+terminate:
+  - type: AfterTime
+    parameters: 500

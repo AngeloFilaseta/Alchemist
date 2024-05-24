@@ -68,7 +68,6 @@ class LostUpdatesAndUselessPollingMonitor(
                     }
                 }
             }
-            println("Events: $events, lost updates: $lostUpdates, useless polling: $uselessPolling")
         }
     }
 }
