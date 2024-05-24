@@ -94,11 +94,3 @@ monitors:
   type: GraphQLMonitor
   parameters:
     port: *port
-
-export:
-  - type: CSVExporter
-    parameters:
-      fileNameRoot: "test_export_interval"
-      interval: 3.0
-    data:
-      - type: it.unibo.alchemist.server.extractors.DSRTEvalExtractor
