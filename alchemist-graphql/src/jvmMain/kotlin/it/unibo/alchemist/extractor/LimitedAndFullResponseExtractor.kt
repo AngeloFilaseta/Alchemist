@@ -18,7 +18,7 @@ import it.unibo.alchemist.model.Time
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-class LitimedAndFullResponseExtractor(private val port: Int) : Extractor<Double> {
+class LimitedAndFullResponseExtractor(private val port: Int) : Extractor<Double> {
 
     override val columnNames: List<String>
         get() = listOf("simulation_time", "nodes", "limited_size", "full_size")
