@@ -125,13 +125,11 @@ File(project.projectDir.path + "/src/main/yaml").listFiles()
             }
         }
         val capitalizedName = it.nameWithoutExtension.capitalizeString()
-        val graphic by basetask("run${capitalizedName}Graphic") {
+        val graphic by basetask("run${capitalizedName}Default") {
             group = alchemistGroupGraphic
             args(
                 "--override",
-                "monitors: { type: SwingGUI, parameters: { graphics: effects/${it.nameWithoutExtension}.json } }",
-                "--override",
-                "launcher: { parameters: { batch: [], autoStart: false } }",
+                "launcher: { parameters: { batch: [], autoStart: true } }",
             )
         }
         runAllGraphic.dependsOn(graphic)
@@ -140,7 +138,10 @@ File(project.projectDir.path + "/src/main/yaml").listFiles()
             description = "Launches batch experiments for $capitalizedName"
             maxHeapSize = "${minOf(heap.toInt(), Runtime.getRuntime().availableProcessors() * taskSize)}m"
             File("data").mkdirs()
-            args()
+            args(
+                "--override",
+                "launcher: { parameters: { batch: [frequency], autoStart: true } }",
+            )
         }
         runAllBatch.dependsOn(batch)
     }
