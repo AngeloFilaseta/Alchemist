@@ -22,11 +22,16 @@ import kotlin.time.Duration.Companion.seconds
 class LostUpdatesAndUselessPollingMonitor(
     randomGenerator: RandomGenerator,
     frequency: Double, // Hz
-    val averageResponseCreationTime: Double, // s
+    averageResponseCreationTime: Double, // s
     jitter: Double, // s
 ) : OutputMonitor<Nothing, Nothing> {
 
+    private val pollingTime: Duration = (1 / frequency).seconds
+    private val jDistr = ExponentialDistribution(randomGenerator, jitter)
+    private val respCreationTimeDistr = ExponentialDistribution(randomGenerator, averageResponseCreationTime)
+
     private var lastUpdate: Duration = System.nanoTime().nanoseconds
+    private var nextUpdate: Duration = lastUpdate + pollingTime
 
     @Volatile
     var events = 0
@@ -39,13 +44,14 @@ class LostUpdatesAndUselessPollingMonitor(
     @Volatile
     var uselessPolling = 0
         private set
-    private val pollingTime: Duration = (1 / frequency).seconds
-    private var nextUpdate: Duration = lastUpdate + pollingTime
-    private val jitterDistribution = ExponentialDistribution(randomGenerator, jitter)
 
-    fun computeNextUpdate() {
+    private var eventsFromLastUpdate = 0
+
+    private fun computeNextUpdate() {
         lastUpdate = nextUpdate
-        nextUpdate = lastUpdate + jitterDistribution.sample().seconds + pollingTime
+        nextUpdate = lastUpdate + jDistr.sample().seconds + respCreationTimeDistr.sample().seconds + pollingTime
+        eventsFromLastUpdate = 0
+        // println("Last update: $lastUpdate, next update: $nextUpdate, diff: ${nextUpdate - lastUpdate}")
     }
 
     override fun stepDone(
@@ -57,13 +63,14 @@ class LostUpdatesAndUselessPollingMonitor(
         if (reaction != null) {
             val now = System.nanoTime().nanoseconds
             events++
+            eventsFromLastUpdate++
             when {
-                now < nextUpdate && events > 1 -> {
+                now < nextUpdate && eventsFromLastUpdate > 1 -> {
                     lostUpdates++
                 }
                 now > nextUpdate -> {
                     computeNextUpdate()
-                    if (events == 0) {
+                    if (eventsFromLastUpdate == 0) {
                         uselessPolling++
                     }
                 }
