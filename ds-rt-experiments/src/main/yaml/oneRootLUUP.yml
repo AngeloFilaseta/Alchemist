@@ -1,12 +1,15 @@
 variables:
   seed: &seed
     min: 0
-    max: 20
+    max: 10
     step: 1
     default: 0
   frequency: &frequency
     type: LinearVariable
-    parameters: [1, 10.1, 200, 20]
+    parameters: [10000, 0.01, 10000, 100]
+  artificialSlowDown: &artificialSlowDown
+    type: ArbitraryVariable
+    parameters: [0, 0, 1, 3]
   layerX: &layerX
     10
   layerY: &layerY
@@ -66,18 +69,20 @@ monitors:
   type: LostUpdatesAndUselessPollingMonitor
   parameters:
     frequency: *frequency
-    averageResponseCreationTime: 0.02
-    jitter: 0.02
+    averageResponseCreationTime: 0.002
+    jitter: 0.002
+    artificialSlowDown: *artificialSlowDown
 
 export:
   - type: CSVExporter
     parameters:
       fileNameRoot: luup
-      interval: 10
+      interval: 1000
       exportPath: /home/angelo/AngeloFilaseta/Alchemist/DSRT-python/output_resultsss
     data:
+      - time
       - type: ExtractLostUpdatesAndUselessPollings
 
 terminate:
   - type: AfterTime
-    parameters: 10000
+    parameters: 1000

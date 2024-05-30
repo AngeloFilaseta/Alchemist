@@ -21,6 +21,7 @@ class ExtractLostUpdatesAndUselessPollings : Extractor<Int> {
 
     override val columnNames: List<String> = listOf(
         "events",
+        "observations",
         "lostUpdates",
         "uselessPolling",
     )
@@ -40,6 +41,7 @@ class ExtractLostUpdatesAndUselessPollings : Extractor<Int> {
         return targetMonitor?.let {
             mapOf(
                 "events" to it.events,
+                "observations" to it.observations,
                 "lostUpdates" to it.lostUpdates,
                 "uselessPolling" to it.uselessPolling,
             )

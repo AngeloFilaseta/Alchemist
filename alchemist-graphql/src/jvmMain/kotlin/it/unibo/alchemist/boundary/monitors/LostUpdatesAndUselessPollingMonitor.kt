@@ -16,25 +16,32 @@ import it.unibo.alchemist.model.Time
 import org.apache.commons.math3.distribution.ExponentialDistribution
 import org.apache.commons.math3.random.RandomGenerator
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 
-class LostUpdatesAndUselessPollingMonitor(
+class LostUpdatesAndUselessPollingMonitor @JvmOverloads constructor(
     randomGenerator: RandomGenerator,
-    frequency: Double, // Hz
+    val frequency: Double, // Hz
     averageResponseCreationTime: Double, // s
     jitter: Double, // s
+    val artificialSlowDown: Long = 0,
 ) : OutputMonitor<Nothing, Nothing> {
 
     private val pollingTime: Duration = (1 / frequency).seconds
     private val jDistr = ExponentialDistribution(randomGenerator, jitter)
     private val respCreationTimeDistr = ExponentialDistribution(randomGenerator, averageResponseCreationTime)
 
-    private var lastUpdate: Duration = System.nanoTime().nanoseconds
+    private var lastUpdate: Duration = System.currentTimeMillis().milliseconds
     private var nextUpdate: Duration = lastUpdate + pollingTime
+    private val beginning = System.currentTimeMillis().milliseconds
 
     @Volatile
     var events = 0
+        private set
+
+    @Volatile
+    var observations = 0
         private set
 
     @Volatile
@@ -47,11 +54,17 @@ class LostUpdatesAndUselessPollingMonitor(
 
     private var eventsFromLastUpdate = 0
 
-    private fun computeNextUpdate() {
+    fun nextObservation() {
         lastUpdate = nextUpdate
-        nextUpdate = lastUpdate + jDistr.sample().seconds + respCreationTimeDistr.sample().seconds + pollingTime
-        eventsFromLastUpdate = 0
-        // println("Last update: $lastUpdate, next update: $nextUpdate, diff: ${nextUpdate - lastUpdate}")
+        val jitter = jDistr.sample().seconds
+        val responseCreation = respCreationTimeDistr.sample().seconds
+        nextUpdate = lastUpdate + jitter + responseCreation + pollingTime
+        check(nextUpdate > lastUpdate)
+    }
+
+    override fun initialized(environment: Environment<Nothing, Nothing>) {
+        lastUpdate = 0.nanoseconds
+        nextObservation()
     }
 
     override fun stepDone(
@@ -60,18 +73,35 @@ class LostUpdatesAndUselessPollingMonitor(
         time: Time,
         step: Long,
     ) {
+        Thread.sleep(artificialSlowDown)
         if (reaction != null) {
-            val now = System.nanoTime().nanoseconds
+            val now = System.currentTimeMillis().milliseconds
+//            println("Now is ${(now - beginning).inWholeMilliseconds}ms")
             events++
             eventsFromLastUpdate++
             when {
-                now < nextUpdate && eventsFromLastUpdate > 1 -> {
-                    lostUpdates++
+                now < nextUpdate -> {
+                    if (eventsFromLastUpdate > 1) {
+                        lostUpdates++
+                    }
                 }
-                now > nextUpdate -> {
-                    computeNextUpdate()
-                    if (eventsFromLastUpdate == 0) {
-                        uselessPolling++
+                now >= nextUpdate -> {
+                    when (eventsFromLastUpdate) {
+                        0 -> error("bug")
+                        1 -> {
+                            var observationsBetweenEvents = 0
+                            do {
+                                observationsBetweenEvents++
+                                nextObservation()
+                            } while (nextUpdate <= now)
+                            uselessPolling += observationsBetweenEvents - 1
+                            observations += observationsBetweenEvents
+                            eventsFromLastUpdate = 0
+                        }
+                        else -> {
+                            observations++
+                            eventsFromLastUpdate = 0
+                        }
                     }
                 }
             }

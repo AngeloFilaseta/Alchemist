@@ -140,7 +140,7 @@ File(project.projectDir.path + "/src/main/yaml").listFiles()
             File("data").mkdirs()
             args(
                 "--override",
-                "launcher: { parameters: { batch: [frequency], autoStart: true } }",
+                "launcher: { parameters: { batch: [frequency, seed, artificialSlowDown], autoStart: true, parallelism: 1, showProgress: false } }",
             )
         }
         runAllBatch.dependsOn(batch)
