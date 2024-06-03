@@ -4,10 +4,14 @@ import pandas as pd
 import os
 import re
 import matplotlib.ticker as ticker
+from matplotlib.ticker import ScalarFormatter
 
 pattern = (r'#\s*seed\s*=\s*([0-9]*\.?[0-9]+),\s*frequency\s*=\s*([0-9]*\.?[0-9]+),\s*artificialSlowDown\s*=\s*(['
            r'0-9]*\.?[0-9]+)')
 
+
+plt.rc('text.latex', preamble=r'\usepackage{amsmath,amssymb,amsfonts,amssymb,graphicx}')
+plt.rcParams.update({"text.usetex": True})
 
 # Function to find and extract values from the variables
 def extract_numbers_from_line(line):
@@ -78,35 +82,46 @@ rows = (num_plots // cols) + (num_plots % cols > 0)
 unique_slowdowns.sort()
 
 # Create subplots
-fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows), sharex=True, sharey=False)
+fig, axes = plt.subplots(rows, cols, figsize=(20, 4 * rows), sharex=True, sharey=False)
 
 # Flatten axes array for easy iteration
 axes = axes.flatten()
+
+# Function x**(1/2)
+def forward(x):
+    return x**(1/2)
+
+def inverse(x):
+    return x**2
 
 for ax, slowdown in zip(axes, unique_slowdowns):
     subset = data[data['artificialSlowdown'] == slowdown]
     lu_plot = sns.lineplot(data=subset, x="frequency_kHz", y="lu_norm", color="#B8DE29", ax=ax)
     ax2 = ax.twinx()
     up_plot = sns.lineplot(data=subset, x="frequency_kHz", y="up_norm", color="#482677", ax=ax2)
-
-    ax.set_title(f'Artificial slowdown = {slowdown}ms')
-    ax.set_ylabel('Lost Updates')
-    ax2.set_ylabel('Useless Polling')
+    # ax.set_xscale('log')
+    ax.set_xscale('symlog', linthresh=0.2)
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+    #ax.set_xscale('function', functions=(forward, inverse))
+    # ax.set_xscale('log')
+    ax.set_title(r'\textit{Event Time Execution} = ' + str(int(slowdown)) + 'ms')
+    ax.set_ylabel(r'\textit{Lost Updates}')
+    ax2.set_ylabel(r'\textit{Useless Polling}')
     ax.yaxis.set_major_formatter(ticker.FuncFormatter(custom_formatter))
     ax2.yaxis.set_major_formatter(ticker.FuncFormatter(custom_formatter))
-    ax.set_xlabel('Frequency (kHz)')
+    ax.set_xlabel(r'\textit{Frequency} (kHz)')
     custom_lines = [
         plt.Line2D([0], [0], color="#B8DE29", lw=3),
         plt.Line2D([0], [0], color="#482677", lw=3),
     ]
-    ax2.legend(custom_lines, ["Lost Updates", "Useless Polling"], loc="center right")
+    ax2.legend(custom_lines, ["Lost Updates", "Useless Polling"], loc="upper center")
 
 # Remove empty subplots
 for i in range(num_plots, len(axes)):
     fig.delaxes(axes[i])
 
 plt.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
-fig.suptitle('Lost Updates and Useless Polling across different Artificial slowdowns', fontsize=16)
+fig.suptitle(r'\textit{Lost Updates} and \textit{Useless Polling} with different \textit{Event Time Execution}', fontsize=16)
 
 # Save and show
 plt.savefig("luup_grid.pdf")
