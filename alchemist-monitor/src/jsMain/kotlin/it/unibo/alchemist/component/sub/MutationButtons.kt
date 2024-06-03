@@ -22,13 +22,13 @@ import web.html.ButtonType
 val MutationButtons = FC<MutationButtonsProps>("MutationButtons") { props ->
     div {
         button {
-            className = ClassName("btn btn-primary")
+            className = ClassName("btn btn-success me-1")
             type = ButtonType.button
             +"Play"
             onClick = { props.play() }
         }
         button {
-            className = ClassName("btn btn-primary")
+            className = ClassName("btn btn-warning me-1")
             type = ButtonType.button
             +"Pause"
             onClick = { props.pause() }

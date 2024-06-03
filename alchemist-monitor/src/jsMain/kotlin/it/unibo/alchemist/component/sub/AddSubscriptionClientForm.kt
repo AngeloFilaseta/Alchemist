@@ -12,6 +12,7 @@ package it.unibo.alchemist.component.sub
 import it.unibo.alchemist.component.props.AddClientProps
 import react.FC
 import react.dom.html.ReactHTML.button
+import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.input
 import react.useState
 import web.cssom.ClassName
@@ -22,22 +23,28 @@ import web.cssom.ClassName
 val AddSubscriptionClientForm = FC<AddClientProps>("AddSubscriptionClientForm") { props ->
     var inputText by useState("")
 
-    input {
-        className = ClassName("form-control me-sm-2")
-        placeholder = "Client Address (ex: localhost:8080)"
-        value = inputText
-        onChange = {
-            inputText = it.target.value
+    div {
+        className = ClassName("col-4")
+        input {
+            className = ClassName("form-control")
+            placeholder = "Client address (ex: localhost:8080)"
+            value = inputText
+            onChange = {
+                inputText = it.target.value
+            }
         }
     }
-    button {
-        className = ClassName("btn btn-secondary pr-2")
-        onClick = {
-            val port = inputText.split(":").last()
-            val address = inputText.removeSuffix(":$port")
-            props.addClient(address, port.toInt())
-            inputText = ""
+    div {
+        className = ClassName("col-4")
+        button {
+            className = ClassName("btn btn-success")
+            onClick = {
+                val port = inputText.split(":").last()
+                val address = inputText.removeSuffix(":$port")
+                props.addClient(address, port.toInt())
+                inputText = ""
+            }
+            +"Add client"
         }
-        +"Add client"
     }
 }

@@ -28,7 +28,6 @@ import it.unibo.alchemist.monitor.GraphQLController
 import it.unibo.alchemist.state.store
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
 import react.FC
 import react.Props
 import react.create
@@ -87,7 +86,6 @@ private val App = FC<Props> {
 
     useEffect(dataframes) {
         launchWithCleanup(Dispatchers.Main) {
-            val time = Clock.System.now().toEpochMilliseconds()
             val aggregatedDf = aggregationStrategy?.let { strategy ->
                 DataFrame.aggregated(
                     dataframes.values.map { df ->
@@ -96,16 +94,13 @@ private val App = FC<Props> {
                     strategy,
                 )
             }
-            val plots = dataframes.mapKeys { (client, _) ->
-                client.serverUrl()
-            }.mapValues { (_, df) ->
-                df.toPlot("localSuccess", "green", RENDER_COL_SIZE_LIMIT)
-            }
+            val plots = dataframes.mapValues { (client, df) ->
+                df.toPlot(client.serverUrl(), "localSuccess", "#B8DE29", RENDER_COL_SIZE_LIMIT)
+            }.toList().map { (_, plot) -> plot }
             val allPlots = aggregatedDf?.let {
-                plots + ("Aggregated" to aggregatedDf.toPlot("localSuccess", "red", RENDER_COL_SIZE_LIMIT))
+                plots + (aggregatedDf.toPlot("Aggregated Plot", "localSuccess", "#482677", RENDER_COL_SIZE_LIMIT))
             } ?: plots
             GraphRenderer.renderPlots(allPlots)
-            console.log(Clock.System.now().toEpochMilliseconds() - time)
         }
     }
 

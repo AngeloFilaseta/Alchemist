@@ -9,11 +9,11 @@
 
 package it.unibo.alchemist.component
 
-import it.unibo.alchemist.Full
+import it.unibo.alchemist.General
 import it.unibo.alchemist.InteractionType
-import it.unibo.alchemist.Limited
 import it.unibo.alchemist.Parameter
-import it.unibo.alchemist.ResponseSize
+import it.unibo.alchemist.QueryType
+import it.unibo.alchemist.Specific
 import it.unibo.alchemist.boundary.graphql.client.AllQuery
 import it.unibo.alchemist.boundary.graphql.client.AllSubscription
 import it.unibo.alchemist.boundary.graphql.client.ConcentrationQuery
@@ -40,29 +40,29 @@ val Form = FC<FormProps>("Form") { props ->
 
     val interactiontypes by useState(listOf(InteractionType.Rest, InteractionType.GraphQL))
     val parameters by useState(listOf(Parameter.LocalSuccess))
-    val responseSize by useState(listOf(Limited, Full))
+    val responseSize by useState(listOf(Specific, General))
     val aggregationStrategy by useState(
         listOf(AggregationStrategy.Sum, AggregationStrategy.Average, AggregationStrategy.Max, AggregationStrategy.Min),
     )
 
     var chosenInteractionType by useState<InteractionType?>(null)
     var chosenParameter by useState<Parameter?>(null)
-    var chosenResponseSize by useState<ResponseSize?>(null)
+    var chosenQueryType by useState<QueryType?>(null)
 
-    fun updateState(interactionType: InteractionType, parameter: Parameter, responseSize: ResponseSize) {
+    fun updateState(interactionType: InteractionType, parameter: Parameter, responseSize: QueryType) {
         props.setQuery(null)
         props.setSubscription(null)
         when (interactionType) {
             InteractionType.Rest -> props.setQuery(
                 when (responseSize) {
-                    is Full -> AllQuery()
-                    is Limited -> ConcentrationQuery(parameter.toString())
+                    is General -> AllQuery()
+                    is Specific -> ConcentrationQuery(parameter.toString())
                 },
             )
             is InteractionType.GraphQL -> props.setSubscription(
                 when (responseSize) {
-                    is Full -> AllSubscription()
-                    is Limited -> ConcentrationSubscription(parameter.toString())
+                    is General -> AllSubscription()
+                    is Specific -> ConcentrationSubscription(parameter.toString())
                 },
             )
         }
@@ -71,14 +71,14 @@ val Form = FC<FormProps>("Form") { props ->
     fun updateState() {
         chosenParameter?.let { parameter ->
             chosenInteractionType?.let { interactionType ->
-                chosenResponseSize?.let { responseSize ->
+                chosenQueryType?.let { responseSize ->
                     updateState(interactionType, parameter, responseSize)
                 }
             }
         }
     }
 
-    useEffect(chosenInteractionType, chosenParameter, chosenResponseSize) {
+    useEffect(chosenInteractionType, chosenParameter, chosenQueryType) {
         updateState()
     }
 
@@ -87,31 +87,29 @@ val Form = FC<FormProps>("Form") { props ->
     }
 
     div {
-        className = ClassName("col-lg-6")
+        className = ClassName("col-lg-3 ms-3 mt-3")
         h2 {
             +"Selection Form"
         }
         div {
             className = ClassName("row")
-            // TYPE
             FormElement {
                 title = "Interaction Type"
                 elements = interactiontypes.map { it.toString() }
                 valueChangeHandler = { chosenInteractionType = InteractionType.fromString(it) }
             }
             FormElement {
-                title = "Parameter"
+                title = "Parameter(s) to monitor"
                 elements = parameters.map { it.toString() }
                 valueChangeHandler = { chosenParameter = Parameter.fromString(it) }
             }
-
             FormElement {
-                title = "Response Size"
+                title = "Query Type"
                 elements = responseSize.map { it.toString() }
-                valueChangeHandler = { chosenResponseSize = ResponseSize.fromString(it) }
+                valueChangeHandler = { chosenQueryType = QueryType.fromString(it) }
             }
             FormElement {
-                title = "Aggregation Strategy"
+                title = "Aggregator"
                 elements = aggregationStrategy.map { it.toString() }
                 valueChangeHandler = { props.setAggregationStrategy(it) }
             }

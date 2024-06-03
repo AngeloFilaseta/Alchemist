@@ -18,7 +18,7 @@ sealed interface InteractionType {
      */
     data object Rest : InteractionType {
         override fun toString(): String {
-            return "Rest"
+            return "Rest (Polling)"
         }
     }
 
@@ -27,7 +27,7 @@ sealed interface InteractionType {
      */
     data object GraphQL : InteractionType {
         override fun toString(): String {
-            return "GraphQL"
+            return "GraphQL (Subscription)"
         }
     }
     companion object {

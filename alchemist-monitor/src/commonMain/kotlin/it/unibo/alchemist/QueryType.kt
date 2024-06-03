@@ -18,7 +18,7 @@ import it.unibo.alchemist.boundary.graphql.client.ConcentrationSubscription
 /**
  * Represents the size of the response desired by the client.
  */
-sealed interface ResponseSize {
+sealed interface QueryType {
 
     /**
      * Create a Query object for the given parameter.
@@ -38,10 +38,10 @@ sealed interface ResponseSize {
          * @param value the string to parse
          * @return the ResponseSize object, or null if the string is not recognized
          */
-        fun fromString(value: String): ResponseSize? {
+        fun fromString(value: String): QueryType? {
             return when (value) {
-                Limited.toString() -> Limited
-                Full.toString() -> Full
+                Specific.toString() -> Specific
+                General.toString() -> General
                 else -> null
             }
         }
@@ -51,7 +51,7 @@ sealed interface ResponseSize {
 /**
  * Represents a limited response size.
  */
-data object Limited : ResponseSize {
+data object Specific : QueryType {
 
     override fun asQuery(parameter: Parameter): Query<*> {
         return ConcentrationQuery(parameter.toString())
@@ -61,13 +61,13 @@ data object Limited : ResponseSize {
         return ConcentrationSubscription(parameter.toString())
     }
 
-    override fun toString(): String = "Limited"
+    override fun toString(): String = "Specific"
 }
 
 /**
  * Represents a full response size.
  */
-data object Full : ResponseSize {
+data object General : QueryType {
     override fun asQuery(parameter: Parameter): Query<*> {
         return AllQuery()
     }
@@ -76,5 +76,5 @@ data object Full : ResponseSize {
         return AllSubscription()
     }
 
-    override fun toString(): String = "Full"
+    override fun toString(): String = "General"
 }

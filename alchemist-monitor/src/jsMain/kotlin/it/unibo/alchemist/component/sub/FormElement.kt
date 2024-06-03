@@ -17,26 +17,29 @@ import react.dom.html.ReactHTML.h4
 import web.cssom.ClassName
 
 val FormElement: FC<FormElementProps> = FC("FormElement") { props ->
-    h4 {
-        +props.title
-    }
     div {
-        className = ClassName("col-sm-10")
-        ReactHTML.select {
-            onChange = { event ->
-                event.target.value.let {
-                    props.valueChangeHandler(it)
+        className = ClassName("mt-2")
+        h4 {
+            +props.title
+        }
+        div {
+            className = ClassName("col-sm-10")
+            ReactHTML.select {
+                onChange = { event ->
+                    event.target.value.let {
+                        props.valueChangeHandler(it)
+                    }
                 }
-            }
-            className = ClassName("form-select")
-            defaultValue = ReactHTML.option {
-                value = null
-                +"Select a ${props.title}:"
-            }
-            props.elements.forEach { s ->
-                ReactHTML.option {
-                    +s
-                    value = s
+                className = ClassName("form-select")
+                defaultValue = ReactHTML.option {
+                    value = null
+                    +"Select a ${props.title}:"
+                }
+                props.elements.forEach { s ->
+                    ReactHTML.option {
+                        +s
+                        value = s
+                    }
                 }
             }
         }

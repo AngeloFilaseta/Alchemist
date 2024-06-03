@@ -25,16 +25,9 @@ object GraphRenderer {
      */
     const val RENDER_COL_SIZE_LIMIT = 1000
 
-    private fun buildPlotDiv(plot: Plot, caption: String? = null): HTMLDivElement {
+    private fun buildPlotDiv(plot: Plot): HTMLDivElement {
         return JsFrontendUtil.createPlotDiv(plot).apply {
             addClass("col-4")
-            caption?.let {
-                appendChild(
-                    document.createElement("p").apply {
-                        innerHTML = caption
-                    },
-                )
-            }
         }
     }
 
@@ -42,11 +35,9 @@ object GraphRenderer {
      * Render the plots in the page.
      * @param map a map of caption to [Plot]s.
      */
-    fun renderPlots(map: Map<String, Plot>) {
+    fun renderPlots(map: List<Plot>) {
         val plotDiv = document.getElementById("plot")
         plotDiv?.innerHTML = ""
-        map.map { (caption, plot) ->
-            plotDiv?.appendChild(buildPlotDiv(plot, caption))
-        }
+        map.forEach { plot -> plotDiv?.appendChild(buildPlotDiv(plot)) }
     }
 }

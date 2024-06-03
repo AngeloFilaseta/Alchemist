@@ -32,7 +32,7 @@ val Info = FC("Info") { props: InfoProps ->
         h2 {
             +"Info"
         }
-        className = ClassName("col-lg-6")
+        className = ClassName("col-lg-4 mt-3")
         h4 {
             +"Current Subscription"
         }

@@ -24,11 +24,11 @@ val Navbar = FC<NavbarProps>("MutationButtons") { props ->
     nav {
         className = ClassName("navbar navbar-expand-lg bg-primary")
         a {
-            className = ClassName("navbar-brand text-light pl-2 ")
+            className = ClassName("navbar-brand text-light ps-2 ")
             +"Alchemist Monitor"
         }
         div {
-            className = ClassName("collapse navbar-collapse")
+            className = ClassName("collapse navbar-collapse row")
             AddSubscriptionClientForm {
                 addClient = props.addClient
             }

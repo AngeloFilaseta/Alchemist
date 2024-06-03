@@ -14,6 +14,7 @@ package it.unibo.alchemist.dataframe
 import it.unibo.alchemist.dataframe.aggregation.AggregationStrategy
 import org.jetbrains.letsPlot.geom.geomLine
 import org.jetbrains.letsPlot.intern.Plot
+import org.jetbrains.letsPlot.label.ggtitle
 import org.jetbrains.letsPlot.letsPlot
 
 /**
@@ -61,11 +62,11 @@ interface DataFrame {
      * @param limit the max number of elements for each column.
      * @return a plot using the data frame.
      */
-    fun toPlot(yName: String, color: String, limit: Int): Plot =
-        letsPlot(cols(limit).associate { it.name to it.data }) + geomLine(color = color) {
+    fun toPlot(title: String, yName: String, color: String, limit: Int): Plot =
+        letsPlot(cols(limit).associate { it.name to it.data }) + geomLine(color = color, size = 2.0) {
             x = "time"
             y = yName
-        }
+        } + ggtitle(title)
 
     companion object {
         /**
