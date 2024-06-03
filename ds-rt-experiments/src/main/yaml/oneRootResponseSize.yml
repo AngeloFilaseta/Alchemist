@@ -1,16 +1,11 @@
 variables:
   seed: &seed
     min: 0
-    max: 10
-    step: 1
-    default: 0
-  portSeed: &portSeed
-    min: 0
-    max: 10
+    max: 99
     step: 1
     default: 0
   port: &port
-    formula: 1313 + portSeed
+    formula: 1313 + seed
   radius: &leaderRadius
     100.0
   leaderInitialResource: &leaderInitialResource
@@ -109,8 +104,12 @@ export:
       interval: 3.0
       exportPath: /home/angelo/AngeloFilaseta/Alchemist/DSRT-python/responseSizeResults
     data:
-      - type: LitimedAndFullResponseExtractor
+      - type: LimitedAndFullResponseExtractor
         parameters: [ *port ]
+
+terminate:
+  - type: AfterTime
+    parameters: 3000
 
 #export:
   #  - type: MongoDBExporter

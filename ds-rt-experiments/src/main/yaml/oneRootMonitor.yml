@@ -1,15 +1,11 @@
 variables:
+  port: &port
+    formula: 1313 + seed
   seed: &seed
     min: 0
-    max: 19
+    max: 3
     step: 1
     default: 0
-  frequency: &frequency
-    type: GeometricVariable
-    parameters: [10000, 0.01, 10000, 200]
-  artificialSlowDown: &artificialSlowDown
-    type: ArbitraryVariable
-    parameters: [0, 0, 1, 3]
   layerX: &layerX
     10
   layerY: &layerY
@@ -65,25 +61,16 @@ deployments:
       - type: it.unibo.collektive.alchemist.device.sensors.impl.DeviceSpawner
         parameters: [ *cloningRange ]
 
-monitors:
-  type: LostUpdatesAndUselessPollingMonitor
+launcher:
+  type: MonitorLauncher
   parameters:
-    frequency: *frequency
-    averageResponseCreationTime: 0.002
-    jitter: 0.002
-    artificialSlowDown: *artificialSlowDown
+    host: localhost
+    port: 9090
+    batch: [seed]
+    autoStart: false
 
-export:
-  - type: CSVExporter
-    parameters:
-      fileNameRoot: luup
-      interval: 1000
-      exportPath: /home/angelo/Desktop/docker_test
-    data:
-      - time
-      - type: ExtractLostUpdatesAndUselessPollings
-
-terminate:
-  - type: AfterTime
-    parameters: 1000
-
+monitors:
+  type: GraphQLMonitor
+  parameters:
+    host: localhost
+    port: *port

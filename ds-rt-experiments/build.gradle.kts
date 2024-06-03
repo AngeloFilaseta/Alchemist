@@ -77,13 +77,17 @@ val alchemistGroupGraphic = "Run graphic simulations with Alchemist"
 /*
  * This task is used to run all experiments in sequence
  */
-val runAllGraphic by tasks.register<DefaultTask>("runAllGraphic") {
+val runAllNoOverride by tasks.register<DefaultTask>("runAllNoOverride") {
     group = alchemistGroupGraphic
-    description = "Launches all simulations with the graphic subsystem enabled"
+    description = "Launches all simulations without overrides"
+}
+val runAllDefault by tasks.register<DefaultTask>("runAllDefault") {
+    group = alchemistGroupGraphic
+    description = "Launches all simulations with default variables"
 }
 val runAllBatch by tasks.register<DefaultTask>("runAllBatch") {
     group = alchemistGroupBatch
-    description = "Launches all experiments"
+    description = "Launches all experiments in batches"
 }
 
 fun String.capitalizeString(): String =
@@ -125,14 +129,18 @@ File(project.projectDir.path + "/src/main/yaml").listFiles()
             }
         }
         val capitalizedName = it.nameWithoutExtension.capitalizeString()
-        val graphic by basetask("run${capitalizedName}Default") {
+        val noOverride by basetask("run${capitalizedName}NoOverride") {
+            group = alchemistGroupGraphic
+        }
+        runAllDefault.dependsOn(noOverride)
+        val default by basetask("run${capitalizedName}Default") {
             group = alchemistGroupGraphic
             args(
                 "--override",
                 "launcher: { parameters: { batch: [], autoStart: true } }",
             )
         }
-        runAllGraphic.dependsOn(graphic)
+        runAllDefault.dependsOn(default)
         val batch by basetask("run${capitalizedName}Batch") {
             group = alchemistGroupBatch
             description = "Launches batch experiments for $capitalizedName"
@@ -140,7 +148,7 @@ File(project.projectDir.path + "/src/main/yaml").listFiles()
             File("data").mkdirs()
             args(
                 "--override",
-                "launcher: { parameters: { batch: [frequency, seed, artificialSlowDown], autoStart: true, parallelism: 1, showProgress: false } }",
+                "launcher: { parameters: { batch: [seed, frequency, artificialSlowDown], autoStart: true, parallelism: 1, showProgress: false } }",
             )
         }
         runAllBatch.dependsOn(batch)
